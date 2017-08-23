@@ -1,19 +1,23 @@
 /*******************************************************************************
  * Licensed Materials - Property of IBM
- * (c) Copyright IBM Corporation 2014. All Rights Reserved.
+ * (c) Copyright IBM Corporation 2017. All Rights Reserved.
  *
  * Note to U.S. Government Users Restricted Rights:  Use,
  * duplication or disclosure restricted by GSA ADP Schedule
  * Contract with IBM Corp.
  *******************************************************************************/
-package com.urbancode.jenkins.plugins.ucrelease;
+package com.ibm.devops.connect;
 
 import java.net.URI;
 import java.util.Properties;
 
+import jenkins.model.Jenkins;
+
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.ibm.devops.dra.DevOpsGlobalConfiguration;
 
 import com.ibm.cloud.urbancode.connect.client.ConnectSocket;
 import com.ibm.cloud.urbancode.connect.client.Listeners;
@@ -38,15 +42,11 @@ public class CloudSocketComponent {
     }
 
     public String getSyncId() {
-        return "ce64dea4-6728-46da-ad62-b371706755c9";
-        // Properties props = SyncApplicationProperties.getProperties();
-        // return props.getProperty(SyncApplicationProperties.SYNC_ID);
+    	return Jenkins.getInstance().getDescriptorByType(DevOpsGlobalConfiguration.class).getSyncId();
     }
 
     public String getSyncToken() {
-        return "KPZLS8cRrR1Llz2aa7slwV7w9p6Kou8bhcZSvSQ0Xxb6WW1GmwbQF5oRuRBcyXUJsBF2b9SxQ5fA40avD7NqwA";
-        // Properties props = SyncApplicationProperties.getProperties();
-        // return props.getProperty(SyncApplicationProperties.SYNC_TOKEN);
+    	return Jenkins.getInstance().getDescriptorByType(DevOpsGlobalConfiguration.class).getSyncId();
     }
 
     public void connectToCloudServices() throws Exception {

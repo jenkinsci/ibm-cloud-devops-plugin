@@ -30,6 +30,8 @@ public class DevOpsGlobalConfiguration extends GlobalConfiguration {
     @CopyOnWrite
     private volatile String consoleUrl;
     private volatile boolean debug_mode;
+    private volatile String syncId;
+    private volatile String syncToken;
 
     public DevOpsGlobalConfiguration() {
         load();
@@ -52,6 +54,24 @@ public class DevOpsGlobalConfiguration extends GlobalConfiguration {
         this.consoleUrl = consoleUrl;
         save();
     }
+    
+    public String getSyncId() {
+    	return syncId;
+    }
+    
+    public void setSyncId(String syncId) {
+        this.syncId = syncId;
+        save();
+    }
+    
+    public String getSyncToken() {
+    	return syncToken;
+    }
+    
+    public void setSyncToken(String syncToken) {
+        this.syncToken = syncToken;
+        save();
+    }
 
     @Override
     public boolean configure(StaplerRequest req, JSONObject formData) throws FormException {
@@ -59,6 +79,8 @@ public class DevOpsGlobalConfiguration extends GlobalConfiguration {
         // set that to properties and call save().
         consoleUrl = formData.getString("consoleUrl");
         debug_mode = Boolean.parseBoolean(formData.getString("debug_mode"));
+        syncId = formData.getString("syncId");
+        syncToken = formData.getString("syncToken");
         save();
         return super.configure(req,formData);
     }
