@@ -46,7 +46,7 @@ public class CloudSocketComponent {
     }
 
     public String getSyncToken() {
-    	return Jenkins.getInstance().getDescriptorByType(DevOpsGlobalConfiguration.class).getSyncId();
+    	return Jenkins.getInstance().getDescriptorByType(DevOpsGlobalConfiguration.class).getSyncToken();
     }
 
     public void connectToCloudServices() throws Exception {
