@@ -12,9 +12,12 @@ import hudson.slaves.ComputerListener;
 import hudson.model.Computer;
 import hudson.Extension;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @Extension
 public class ConnectComputerListener extends ComputerListener {
-
+	public static final Logger log = LoggerFactory.getLogger(ConnectComputerListener.class);
     @Override
     public void onOnline(Computer c) {
 
@@ -24,9 +27,11 @@ public class ConnectComputerListener extends ComputerListener {
         CloudSocketComponent socket = new CloudSocketComponent(listener, url);
 
         try {
+        	log.info("Connecting to Cloud Services...");
             socket.connectToCloudServices();
+            log.info("Connected to Cloud Services!");
         } catch (Exception e) {
-            System.out.println("WE CAUGHT AN EXCEPTION: " + e);
+            log.error("Exception caught while connecting to Cloud Services: " + e);
         }
     }
 

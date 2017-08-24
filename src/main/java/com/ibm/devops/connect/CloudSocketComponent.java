@@ -75,12 +75,8 @@ public class CloudSocketComponent {
         socket.on(Socket.EVENT_RECONNECT_FAILED, Listeners.ERROR_LOGGING);
         socket.on(Socket.EVENT_RECONNECT_ATTEMPT, Listeners.INFO_LOGGING);
         // do not listen for Socket.EVENT_RECONNECT, we will make 2 get work requests
-        log.info("Connecting to cloud service at {}", uri);
+        
         socket.connect();
-
-        System.out.println("---------------->>>>>>>>>>>>>>>>>>>");
-        System.out.println("WE HAVE CONNECTED TO THE SERVER.....");
-
     }
     
     // this does get called, but you may not see logging in the console. it will appear in the file.

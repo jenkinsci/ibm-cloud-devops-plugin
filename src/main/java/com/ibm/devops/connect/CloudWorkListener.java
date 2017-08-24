@@ -14,6 +14,11 @@ import java.util.concurrent.TimeUnit;
 // import org.json.JSONException;
 // import org.json.JSONObject;
 
+import org.apache.commons.lang.builder.ToStringBuilder;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.ibm.cloud.urbancode.connect.client.ConnectSocket;
@@ -25,7 +30,7 @@ import jenkins.model.Jenkins;
  * injected, you must use IWorkListener.
  */
 public class CloudWorkListener implements IWorkListener {
-    
+	public static final Logger log = LoggerFactory.getLogger(CloudWorkListener.class);
     public CloudWorkListener() {
 
     }
@@ -35,12 +40,12 @@ public class CloudWorkListener implements IWorkListener {
      */
     @Override
     public void call(ConnectSocket socket, String event, Object... args) {
-        System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
-        System.out.println("THIS IS THE CALL FUNCTION....");
-        System.out.println(event);
-        System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
-        System.out.println(args);
-        System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+        log.info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+        log.info("THIS IS THE CALL FUNCTION....");
+        log.info("Event: " + event);
+        log.info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+        log.info("Args: " + ToStringBuilder.reflectionToString(args));
+        log.info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
         
     }
 }
