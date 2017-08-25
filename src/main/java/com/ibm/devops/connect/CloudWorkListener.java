@@ -22,7 +22,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.ibm.cloud.urbancode.connect.client.ConnectSocket;
-import jenkins.model.Jenkins;
+
 /*
  * When Spring is applying the @Transactional annotation, it creates a proxy class which wraps your class.
  * So when your bean is created in your application context, you are getting an object that is not of type
@@ -43,9 +43,8 @@ public class CloudWorkListener implements IWorkListener {
         log.info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
         log.info("THIS IS THE CALL FUNCTION....");
         log.info("Event: " + event);
-        log.info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
-        log.info("Args: " + ToStringBuilder.reflectionToString(args));
-        log.info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
-        
+//        log.info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+//        log.info("Args: " + ToStringBuilder.reflectionToString(args));
+//        log.info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
     }
 }
