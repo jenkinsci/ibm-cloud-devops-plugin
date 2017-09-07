@@ -24,6 +24,8 @@ import org.apache.commons.lang.builder.ToStringBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.jenkinsci.plugins.uniqueid.IdStore;
+
 /**
  * Jenkins server
  */
@@ -52,6 +54,18 @@ public class JenkinsJob {
 		jobToJson.put("name", this.item.getName());
 		jobToJson.put("full_name", this.item.getFullName());
 		jobToJson.put("job_url", this.item.getUrl());
+
+		String jobId;
+
+		if(IdStore.getId(this.item) != null) {
+			jobId = IdStore.getId(this.item);
+		} else {
+			IdStore.makeId(this.item);
+			jobId = IdStore.getId(this.item);
+		}
+
+		jobToJson.put("id", jobId);
+		jobToJson.put("instance_type", "JENKINS");
 
     	// log.info("job: " + ToStringBuilder.reflectionToString(jobToJson));    	
 		return jobToJson;

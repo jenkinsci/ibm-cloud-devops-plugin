@@ -43,8 +43,7 @@ public class CloudWorkListener implements IWorkListener {
         log.info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
         log.info("THIS IS THE CALL FUNCTION....");
         log.info("Event: " + event);
-//        log.info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
-//        log.info("Args: " + ToStringBuilder.reflectionToString(args));
-//        log.info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+        log.info("Args: " + args.toString());
+        log.info("Args: " + args[0].toString());
     }
 }

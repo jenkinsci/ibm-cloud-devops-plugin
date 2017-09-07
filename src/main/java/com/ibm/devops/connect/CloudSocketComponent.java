@@ -22,6 +22,8 @@ import com.ibm.devops.dra.DevOpsGlobalConfiguration;
 import com.ibm.cloud.urbancode.connect.client.ConnectSocket;
 import com.ibm.cloud.urbancode.connect.client.Listeners;
 
+import com.ibm.devops.connect.CloudPublisher;
+
 import io.socket.client.Socket;
 
 public class CloudSocketComponent {
@@ -56,6 +58,10 @@ public class CloudSocketComponent {
             log.info("Not connecting to the cloud. IBM Bluemix DevOps Connect not registered yet.");
             return;
         }
+
+        CloudPublisher cloudPublisher = new CloudPublisher();
+        cloudPublisher.createIntegrationIfNecessary();
+
         URI uri = new URI(cloudUrl);
         log.info("Starting cloud endpoint " + syncId);
         socket = ConnectSocket.builder()
