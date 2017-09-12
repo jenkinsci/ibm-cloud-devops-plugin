@@ -31,6 +31,8 @@ import com.ibm.cloud.urbancode.connect.client.ConnectSocket;
  */
 public class CloudWorkListener implements IWorkListener {
 	public static final Logger log = LoggerFactory.getLogger(CloudWorkListener.class);
+    private String logPrefix= "[IBM Cloud DevOps] CloudWorkListener#";
+    
     public CloudWorkListener() {
 
     }
@@ -40,10 +42,11 @@ public class CloudWorkListener implements IWorkListener {
      */
     @Override
     public void call(ConnectSocket socket, String event, Object... args) {
-        log.info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
-        log.info("THIS IS THE CALL FUNCTION....");
-        log.info("Event: " + event);
-        log.info("Args: " + args.toString());
-        log.info("Args: " + args[0].toString());
+    	logPrefix= logPrefix + "call ";
+        log.info(logPrefix + ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+        log.info(logPrefix + "THIS IS THE CALL FUNCTION....");
+        log.info(logPrefix + "Event: " + event);
+        log.info(logPrefix + "Args: " + args.toString());
+        log.info(logPrefix + "Args: " + args[0].toString());
     }
 }

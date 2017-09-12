@@ -34,23 +34,26 @@ import org.slf4j.LoggerFactory;
 
 public class JenkinsServer {
 	public static final Logger log = LoggerFactory.getLogger(JenkinsServer.class);
-	
+    private static String logPrefix= "[IBM Cloud DevOps] JenkinsServer#";
+    
 	// not used yet - but might be used later
     public static Collection<String> getJobNames() {
-    	log.info("JenkinsServer: getJobNames()");
+    	logPrefix= logPrefix + "getJobNames ";
+    	log.info(logPrefix + "get the list of job names");
     	Collection<String> allJobNames= Jenkins.getInstance().getJobNames();
-    	log.info("retrieved " + allJobNames.size() + " JobNames");
+    	log.info(logPrefix + "retrieved " + allJobNames.size() + " JobNames");
     	for (Iterator iterator = allJobNames.iterator(); iterator.hasNext();) {
     		String aJobName = (String) iterator.next(); 
-    		log.info("job: " + aJobName);
+    		log.info(logPrefix + "job: " + aJobName);
     	}
     	return Jenkins.getInstance().getJobNames();
     }
     
     public static List<Item> getAllItems() {
-    	log.info("JenkinsServer: getAllItems()");
+    	logPrefix= logPrefix + "getAllItems ";
+    	log.info(logPrefix + "get the list of all items");
     	List<AbstractItem> allProjects= Jenkins.getInstance().getAllItems(AbstractItem.class);
-    	log.info("Retrieved " + allProjects.size() + " projects");
+    	log.info(logPrefix + "Retrieved " + allProjects.size() + " projects");
     	return Jenkins.getInstance().getAllItems();
     }
 }

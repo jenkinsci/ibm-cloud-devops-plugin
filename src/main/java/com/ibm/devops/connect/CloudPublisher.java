@@ -55,6 +55,7 @@ import hudson.tasks.BuildStepMonitor;
 
 public class CloudPublisher  {
 	public static final Logger log = LoggerFactory.getLogger(CloudPublisher.class);
+	private String logPrefix= "[IBM Cloud DevOps] CloudPublisher#";
 
     private final String JENKINS_JOB_ENDPOINT_URL = "api/v1/jenkins/jobs";
     private final String INTEGRATIONS_ENDPOINT_URL = "api/v1/integrations";
@@ -102,6 +103,7 @@ public class CloudPublisher  {
      * Upload the build information to DLMS - API V2.
      */
     public boolean uploadJobInfo(JSONObject jobJson) {
+    	logPrefix= logPrefix + "uploadJobInfo ";
         String resStr = "";
 
         try {
@@ -136,19 +138,19 @@ public class CloudPublisher  {
             resStr = EntityUtils.toString(response.getEntity());
             if (response.getStatusLine().toString().contains("200")) {
                 // get 200 response
-                log.info("[IBM Cloud DevOps] Upload Job Information successfully");
+                log.info(logPrefix + "Upload Job Information successfully");
                 return true;
 
             } else {
                 // if gets error status
-                log.info("[IBM Cloud DevOps] Error: Failed to upload Job, response status " + response.getStatusLine());
+                log.error(logPrefix + "Error: Failed to upload Job, response status " + response.getStatusLine());
             }
         } catch (JsonSyntaxException e) {
-            log.info("[IBM Cloud DevOps] Invalid Json response, response: " + resStr);
+            log.error(logPrefix + "Invalid Json response, response: " + resStr);
         } catch (IllegalStateException e) {
             // will be triggered when 403 Forbidden
             try {
-                log.info("[IBM Cloud DevOps] Please check if you have the access to " + URLEncoder.encode(this.orgName, "UTF-8") + " org");
+                log.error(logPrefix + "Please check if you have the access to " + URLEncoder.encode(this.orgName, "UTF-8") + " org");
             } catch (UnsupportedEncodingException e1) {
                 e1.printStackTrace();
             }
@@ -163,6 +165,7 @@ public class CloudPublisher  {
     }
 
     public boolean createIntegrationIfNecessary() {
+    	logPrefix= logPrefix + "createIntegrationIfNecessary ";
         String resStr = "";
         try {
             CloseableHttpClient httpClient = HttpClients.createDefault();
@@ -190,24 +193,24 @@ public class CloudPublisher  {
             resStr = EntityUtils.toString(response.getEntity());
             if (response.getStatusLine().toString().contains("200") || response.getStatusLine().toString().contains("201")) {
                 // get 200 response
-                log.info("[IBM Cloud DevOps] Integration was ");
+                log.info(logPrefix + "Integration was retrieved");
                 return true;
 
             } else {
                 // if gets error status
                 log.info("--------------------------------------------");
-                log.info("[IBM Cloud DevOps] No Integration Retrieved");
+                log.info(logPrefix + "No Integration Retrieved");
 
-                log.info("Attempting to create Integration");
-                this.createIntegration(jenkinsId);
+                log.info(logPrefix + "Attempting to create a new integration");
+                return this.createIntegration(jenkinsId);
 
             }
         } catch (JsonSyntaxException e) {
-            log.info("[IBM Cloud DevOps] Invalid Json response, response: " + resStr);
+            log.error(logPrefix + "Invalid Json response, response: " + resStr);
         } catch (IllegalStateException e) {
             // will be triggered when 403 Forbidden
             try {
-                log.info("[IBM Cloud DevOps] Please check if you have the access to " + URLEncoder.encode(this.orgName, "UTF-8") + " org");
+                log.info(logPrefix + "Please check if you have the access to " + URLEncoder.encode(this.orgName, "UTF-8") + " org");
             } catch (UnsupportedEncodingException e1) {
                 e1.printStackTrace();
             }
@@ -222,6 +225,7 @@ public class CloudPublisher  {
     }
 
     private boolean createIntegration(String jenkinsId) {
+    	logPrefix= logPrefix + "createIntegration ";
         String resStr = "";
 
         try {
@@ -256,19 +260,19 @@ public class CloudPublisher  {
             if (response.getStatusLine().toString().contains("200") || response.getStatusLine().toString().contains("201")) {
                 // get 200 response
                 log.info("===================================================");
-                log.info("[IBM Cloud DevOps] Created integration successfully");
+                log.info(logPrefix + "Created integration successfully");
                 return true;
 
             } else {
                 // if gets error status
-                log.info("[IBM Cloud DevOps] Error: Failed to create integration, response status " + response.getStatusLine());
+                log.error(logPrefix + "Error: Failed to create integration, response status " + response.getStatusLine());
             }
         } catch (JsonSyntaxException e) {
-            log.info("[IBM Cloud DevOps] Invalid Json response, response: " + resStr);
+            log.error(logPrefix + "Invalid Json response, response: " + resStr);
         } catch (IllegalStateException e) {
             // will be triggered when 403 Forbidden
             try {
-                log.info("[IBM Cloud DevOps] Please check if you have the access to " + URLEncoder.encode(this.orgName, "UTF-8") + " org");
+                log.error(logPrefix + "Please check if you have the access to " + URLEncoder.encode(this.orgName, "UTF-8") + " org");
             } catch (UnsupportedEncodingException e1) {
                 e1.printStackTrace();
             }
