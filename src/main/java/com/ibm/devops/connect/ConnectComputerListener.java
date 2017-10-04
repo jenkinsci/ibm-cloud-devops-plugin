@@ -18,20 +18,23 @@ import org.slf4j.LoggerFactory;
 @Extension
 public class ConnectComputerListener extends ComputerListener {
 	public static final Logger log = LoggerFactory.getLogger(ConnectComputerListener.class);
+    private String logPrefix= "[IBM Cloud DevOps] ConnectComputerListener#";
+    
     @Override
     public void onOnline(Computer c) {
-
         String url = getConnectUrl();
+
+    	logPrefix= logPrefix + "onOnline ";
 
         CloudWorkListener listener = new CloudWorkListener();
         CloudSocketComponent socket = new CloudSocketComponent(listener, url);
 
         try {
-        	log.info("Connecting to Cloud Services...");
+        	log.info(logPrefix + "Connecting to Cloud Services...");
             socket.connectToCloudServices();
-            log.info("Connected to Cloud Services!");
+            log.info(logPrefix + "Connected to Cloud Services!");
         } catch (Exception e) {
-            log.error("Exception caught while connecting to Cloud Services: " + e);
+            log.error(logPrefix + "Exception caught while connecting to Cloud Services: " + e);
         }
     }
 

@@ -50,6 +50,8 @@ import java.lang.InterruptedException;
  */
 public class CloudWorkListener implements IWorkListener {
 	public static final Logger log = LoggerFactory.getLogger(CloudWorkListener.class);
+    private String logPrefix= "[IBM Cloud DevOps] CloudWorkListener#";
+    
     public CloudWorkListener() {
 
     }
@@ -63,7 +65,7 @@ public class CloudWorkListener implements IWorkListener {
      */
     @Override
     public void call(ConnectSocket socket, String event, Object... args) {
-        log.info("[IBM Connect Socket] Received event from Connect Socket");
+        log.info(logPrefix + " Received event from Connect Socket");
 
         JSONArray incomingJobs = JSONArray.fromObject(args[0].toString());
 

@@ -33,9 +33,11 @@ import net.sf.json.JSONObject;
 @Extension
 public class CloudItemListener extends ItemListener {
 	public static final Logger log = LoggerFactory.getLogger(CloudItemListener.class);
+	private String logPrefix= "[IBM Cloud DevOps] CloudItemListener#";
 	
     public CloudItemListener(){
-    	log.info("CloudItemListener started...");
+    	logPrefix= logPrefix + "CloudItemListener ";
+    	log.info(logPrefix + "CloudItemListener started...");
     	buildJobsList();
     }
 
@@ -63,7 +65,7 @@ public class CloudItemListener extends ItemListener {
     }
     
     private List<JSONObject> buildJobsList() {
-    	log.info("Building the list of Jenkins jobs...");
+    	log.info(logPrefix + "Building the list of Jenkins jobs...");
     	List<Item> allProjects= JenkinsServer.getAllItems();
     	List<JSONObject> allJobs = new ArrayList<JSONObject>();
     	for (Item anItem : allProjects) {

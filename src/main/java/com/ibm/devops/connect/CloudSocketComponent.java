@@ -29,6 +29,7 @@ import io.socket.client.Socket;
 public class CloudSocketComponent {
 
     public static final Logger log = LoggerFactory.getLogger(CloudSocketComponent.class);
+    private String logPrefix= "[IBM Cloud DevOps] CloudSocketComponent#";
 
     final private IWorkListener workListener;
     final private String cloudUrl;
@@ -52,10 +53,11 @@ public class CloudSocketComponent {
     }
 
     public void connectToCloudServices() throws Exception {
+    	logPrefix= logPrefix + "connectToCloudServices ";
         String syncId = getSyncId();
         String syncToken = getSyncToken();
         if (StringUtils.isBlank(syncId) || StringUtils.isBlank(syncToken)) {
-            log.info("Not connecting to the cloud. IBM Bluemix DevOps Connect not registered yet.");
+            log.info(logPrefix + "Not connecting to the cloud. IBM Bluemix DevOps Connect not registered yet.");
             return;
         }
 
@@ -63,7 +65,7 @@ public class CloudSocketComponent {
         cloudPublisher.createIntegrationIfNecessary();
 
         URI uri = new URI(cloudUrl);
-        log.info("Starting cloud endpoint " + syncId);
+        log.info(logPrefix + "Starting cloud endpoint " + syncId);
         socket = ConnectSocket.builder()
             .uri(uri)
             .id(syncId)
@@ -90,10 +92,10 @@ public class CloudSocketComponent {
         if (socket != null) {
             try {
                 socket.disconnect();
-                log.info("Disconnected from the cloud service");
+                log.info(logPrefix + "Disconnected from the cloud service");
             }
             catch (Exception e) {
-                log.error("Error disconnecting the cloud service gracefully", e);
+                log.error(logPrefix + "Error disconnecting the cloud service gracefully", e);
             }
             finally {
                 socket = null;
