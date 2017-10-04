@@ -57,6 +57,7 @@ public class CloudPublisher  {
 	public static final Logger log = LoggerFactory.getLogger(CloudPublisher.class);
 
     private final String JENKINS_JOB_ENDPOINT_URL = "api/v1/jenkins/jobs";
+    private final String JENKINS_JOB_STATUS_ENDPOINT_URL = "api/v1/jenkins/jobStatus";
     private final String INTEGRATIONS_ENDPOINT_URL = "api/v1/integrations";
     private final String INTEGRATION_ENDPOINT_URL = "api/v1/integrations/{integration_id}";
 
@@ -91,7 +92,9 @@ public class CloudPublisher  {
     }
 
     private String getSyncApiUrl() {
-        return "http://localhost:6002/";
+        // return "http://localhost:6002/";
+
+        return "https://ucreporting-sync-api-stage1.stage1.mybluemix.net/";
     }
 
     private String getSyncStoreUrl() {
@@ -99,18 +102,30 @@ public class CloudPublisher  {
     }
 
     /**
-     * Upload the build information to DLMS - API V2.
+     * Upload the build information to Sync API - API V1.
      */
     public boolean uploadJobInfo(JSONObject jobJson) {
+        String url = this.getSyncApiUrl() + JENKINS_JOB_ENDPOINT_URL;
+
+        JSONArray payload = new JSONArray();
+        payload.add(jobJson);
+
+        return postToSyncAPI(url, payload.toString());
+    }
+
+    public boolean uploadJobStatus(JSONObject jobStatus) {
+
+        String url = this.getSyncApiUrl() + JENKINS_JOB_STATUS_ENDPOINT_URL;
+
+        return postToSyncAPI(url, jobStatus.toString());
+    }
+
+    private boolean postToSyncAPI(String url, String payload) {
         String resStr = "";
 
         try {
             CloseableHttpClient httpClient = HttpClients.createDefault();
-            String url = this.getSyncApiUrl() + JENKINS_JOB_ENDPOINT_URL;
-
-            JSONArray payload = new JSONArray();
-            payload.add(jobJson);
-
+            
             String jenkinsId;
 
             if (IdStore.getId(Jenkins.getInstance()) != null) {
@@ -128,7 +143,7 @@ public class CloudPublisher  {
             postMethod.setHeader("instance_id", jenkinsId);
             postMethod.setHeader("Content-Type", "application/json");
 
-            StringEntity data = new StringEntity(payload.toString());
+            StringEntity data = new StringEntity(payload);
             postMethod.setEntity(data);
 
             CloseableHttpResponse response = httpClient.execute(postMethod);
@@ -136,7 +151,7 @@ public class CloudPublisher  {
             resStr = EntityUtils.toString(response.getEntity());
             if (response.getStatusLine().toString().contains("200")) {
                 // get 200 response
-                log.info("[IBM Cloud DevOps] Upload Job Information successfully");
+                // log.info("[IBM Cloud DevOps] Upload Job Information successfully");
                 return true;
 
             } else {
@@ -190,14 +205,11 @@ public class CloudPublisher  {
             resStr = EntityUtils.toString(response.getEntity());
             if (response.getStatusLine().toString().contains("200") || response.getStatusLine().toString().contains("201")) {
                 // get 200 response
-                log.info("[IBM Cloud DevOps] Integration was ");
                 return true;
 
             } else {
                 // if gets error status
-                log.info("--------------------------------------------");
                 log.info("[IBM Cloud DevOps] No Integration Retrieved");
-
                 log.info("Attempting to create Integration");
                 this.createIntegration(jenkinsId);
 
@@ -243,8 +255,6 @@ public class CloudPublisher  {
             String authEncoding = DatatypeConverter.printBase64Binary((Jenkins.getInstance().getDescriptorByType(DevOpsGlobalConfiguration.class).getSyncId() + ":" + Jenkins.getInstance().getDescriptorByType(DevOpsGlobalConfiguration.class).getSyncToken()).getBytes("UTF-8"));
             postMethod.setHeader("Authorization", "Basic " + authEncoding);
 
-            log.info("===================================================");
-            log.info(authEncoding);
             postMethod.setHeader("syncId", Jenkins.getInstance().getDescriptorByType(DevOpsGlobalConfiguration.class).getSyncId());
 
             StringEntity data = new StringEntity(newIntegration.toString());
@@ -255,7 +265,6 @@ public class CloudPublisher  {
             resStr = EntityUtils.toString(response.getEntity());
             if (response.getStatusLine().toString().contains("200") || response.getStatusLine().toString().contains("201")) {
                 // get 200 response
-                log.info("===================================================");
                 log.info("[IBM Cloud DevOps] Created integration successfully");
                 return true;
 

@@ -21,7 +21,7 @@ public class ConnectComputerListener extends ComputerListener {
     @Override
     public void onOnline(Computer c) {
 
-        String url = "https://uccloud-connect-stage1.stage1.mybluemix.net";
+        String url = getConnectUrl();
 
         CloudWorkListener listener = new CloudWorkListener();
         CloudSocketComponent socket = new CloudSocketComponent(listener, url);
@@ -35,4 +35,7 @@ public class ConnectComputerListener extends ComputerListener {
         }
     }
 
+    private String getConnectUrl() {
+        return "https://uccloud-connect-stage1.stage1.mybluemix.net";
+    }
 }

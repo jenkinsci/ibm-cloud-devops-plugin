@@ -16,8 +16,13 @@ package com.ibm.devops.connect;
 
 import hudson.model.*;
 import hudson.model.Item;
+import hudson.model.ParametersDefinitionProperty;
+import hudson.model.queue.SubTask;
+
+import java.util.Collection;
 
 import net.sf.json.JSONObject;
+import net.sf.json.JSONArray;
 
 import org.apache.commons.lang.builder.ToStringBuilder;
 
@@ -25,6 +30,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.jenkinsci.plugins.uniqueid.IdStore;
+
+import java.util.List;
+import jenkins.model.Jenkins;
+import com.ibm.devops.dra.DevOpsGlobalConfiguration;
+import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 
 /**
  * Jenkins server
@@ -44,16 +54,17 @@ public class JenkinsJob {
 	// - stop / cancel
 	// - other stuff?
 	public JSONObject toJson() {
+
 		String displayName= this.item.getDisplayName();
 		String name= this.item.getName();
 		String fullName= this.item.getFullName();
 		String jobUrl= this.item.getUrl();
 		
 		JSONObject jobToJson = new JSONObject();
-		jobToJson.put("display_name", this.item.getDisplayName());
+		jobToJson.put("displayName", this.item.getDisplayName());
 		jobToJson.put("name", this.item.getName());
-		jobToJson.put("full_name", this.item.getFullName());
-		jobToJson.put("job_url", this.item.getUrl());
+		jobToJson.put("fullName", this.item.getFullName());
+		jobToJson.put("jobUrl", this.item.getUrl());
 
 		String jobId;
 
@@ -65,9 +76,44 @@ public class JenkinsJob {
 		}
 
 		jobToJson.put("id", jobId);
-		jobToJson.put("instance_type", "JENKINS");
+		jobToJson.put("instanceType", "JENKINS");
+		jobToJson.put("instanceName", Jenkins.getInstance().getDescriptorByType(DevOpsGlobalConfiguration.class).getInstanceName());
 
-    	// log.info("job: " + ToStringBuilder.reflectionToString(jobToJson));    	
+		if(this.item instanceof WorkflowJob) {
+			jobToJson.put("isPipeline", true);
+			// TODO: Find a way to get Stage definitions
+		} else {
+			jobToJson.put("isPipeline", false);	
+		}
+
+		jobToJson.put("params", getJobParams());
+
 		return jobToJson;
+	}
+
+	private JSONArray getJobParams() {
+		JSONArray result = new JSONArray();
+
+		if(this.item instanceof AbstractProject) {
+			List<Action> actions = ((AbstractProject)this.item).getActions();
+
+			for(Action action : actions) {
+				if (action instanceof ParametersDefinitionProperty) {
+					List<ParameterDefinition> paraDefs = ((ParametersDefinitionProperty)action).getParameterDefinitions();
+					for (ParameterDefinition paramDef : paraDefs) {
+
+						JSONObject paramDefObj = new JSONObject();
+						paramDefObj.put("name", paramDef.getName());
+						paramDefObj.put("type", paramDef.getType());
+						paramDefObj.put("defaultValue", paramDef.getDefaultParameterValue().getValue());
+
+						result.add(paramDefObj);
+					}
+					break;
+				}
+			}
+		}
+
+		return result;
 	}
 }

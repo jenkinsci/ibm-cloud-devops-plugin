@@ -32,6 +32,7 @@ public class DevOpsGlobalConfiguration extends GlobalConfiguration {
     private volatile boolean debug_mode;
     private volatile String syncId;
     private volatile String syncToken;
+    private volatile String instanceName;
 
     public DevOpsGlobalConfiguration() {
         load();
@@ -68,6 +69,15 @@ public class DevOpsGlobalConfiguration extends GlobalConfiguration {
     	return syncToken;
     }
     
+    public void setInstanceName(String instanceName) {
+        this.instanceName = instanceName;
+        save();
+    }
+    
+    public String getInstanceName() {
+    	return instanceName;
+    }
+    
     public void setSyncToken(String syncToken) {
         this.syncToken = syncToken;
         save();
@@ -81,6 +91,7 @@ public class DevOpsGlobalConfiguration extends GlobalConfiguration {
         debug_mode = Boolean.parseBoolean(formData.getString("debug_mode"));
         syncId = formData.getString("syncId");
         syncToken = formData.getString("syncToken");
+        instanceName = formData.getString("instanceName");
         save();
         return super.configure(req,formData);
     }
