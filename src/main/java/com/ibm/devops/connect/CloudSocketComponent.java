@@ -102,4 +102,11 @@ public class CloudSocketComponent {
             }
         }
     }
+
+    public boolean connected() {
+        if(socket == null) {
+            return false;
+        }
+        return socket.connected();
+    }
 }

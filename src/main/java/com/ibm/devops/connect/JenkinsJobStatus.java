@@ -117,16 +117,16 @@ public class JenkinsJobStatus {
     private String getJobUniqueIdFromBuild(AbstractBuild build) {
         AbstractProject project = (AbstractProject)build.getProject();
 
-        String jenkinsId;
+        String projectId;
 
-        if (IdStore.getId(Jenkins.getInstance()) != null) {
-            jenkinsId = IdStore.getId(Jenkins.getInstance());
+        if (IdStore.getId(project) != null) {
+            projectId = IdStore.getId(project);
         } else {
-            IdStore.makeId(Jenkins.getInstance());
-            jenkinsId = IdStore.getId(Jenkins.getInstance());
+            IdStore.makeId(project);
+            projectId = IdStore.getId(project);
         }
 
-        return jenkinsId;
+        return projectId;
     }
 
     private void evaluateSourceData(AbstractBuild build, CloudCause cause) {

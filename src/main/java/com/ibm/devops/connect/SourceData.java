@@ -44,7 +44,9 @@ public class SourceData {
         result.put("revision", revision);
         result.put("scmName", scmName);
         result.put("type", type);
-        result.put("remoteUrls", remoteUrls.toArray());
+        if(remoteUrls != null) {
+            result.put("remoteUrls", remoteUrls.toArray());
+        }
 
         return result;
     }

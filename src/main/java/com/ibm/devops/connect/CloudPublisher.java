@@ -122,7 +122,7 @@ public class CloudPublisher  {
     }
 
     private boolean postToSyncAPI(String url, String payload) {
-    	logPrefix= logPrefix + "uploadJobInfo ";
+    	String localLogPrefix= logPrefix + "uploadJobInfo ";
 
         String resStr = "";
 
@@ -154,19 +154,19 @@ public class CloudPublisher  {
             resStr = EntityUtils.toString(response.getEntity());
             if (response.getStatusLine().toString().contains("200")) {
                 // get 200 response
-                log.info(logPrefix + "Upload Job Information successfully");
+                log.info(localLogPrefix + "Upload Job Information successfully");
                 return true;
 
             } else {
                 // if gets error status
-                log.error(logPrefix + "Error: Failed to upload Job, response status " + response.getStatusLine());
+                log.error(localLogPrefix + "Error: Failed to upload Job, response status " + response.getStatusLine());
             }
         } catch (JsonSyntaxException e) {
-            log.error(logPrefix + "Invalid Json response, response: " + resStr);
+            log.error(localLogPrefix + "Invalid Json response, response: " + resStr);
         } catch (IllegalStateException e) {
             // will be triggered when 403 Forbidden
             try {
-                log.error(logPrefix + "Please check if you have the access to " + URLEncoder.encode(this.orgName, "UTF-8") + " org");
+                log.error(localLogPrefix + "Please check if you have the access to " + URLEncoder.encode(this.orgName, "UTF-8") + " org");
             } catch (UnsupportedEncodingException e1) {
                 e1.printStackTrace();
             }
@@ -181,7 +181,7 @@ public class CloudPublisher  {
     }
 
     public boolean createIntegrationIfNecessary() {
-    	logPrefix= logPrefix + "createIntegrationIfNecessary ";
+    	String localLogPrefix = logPrefix + "createIntegrationIfNecessary ";
         String resStr = "";
         try {
             CloseableHttpClient httpClient = HttpClients.createDefault();
@@ -209,22 +209,22 @@ public class CloudPublisher  {
             resStr = EntityUtils.toString(response.getEntity());
             if (response.getStatusLine().toString().contains("200") || response.getStatusLine().toString().contains("201")) {
                 // get 200 response
-                log.info(logPrefix + "Integration was retrieved");
+                log.info(localLogPrefix + "Integration was retrieved");
                 return true;
 
             } else {
                 // if gets error status
                 log.info("--------------------------------------------");
-                log.info(logPrefix + "No Integration Retrieved");
-                log.info(logPrefix + "Attempting to create a new integration");
+                log.info(localLogPrefix + "No Integration Retrieved");
+                log.info(localLogPrefix + "Attempting to create a new integration");
                 return this.createIntegration(jenkinsId);
             }
         } catch (JsonSyntaxException e) {
-            log.error(logPrefix + "Invalid Json response, response: " + resStr);
+            log.error(localLogPrefix + "Invalid Json response, response: " + resStr);
         } catch (IllegalStateException e) {
             // will be triggered when 403 Forbidden
             try {
-                log.info(logPrefix + "Please check if you have the access to " + URLEncoder.encode(this.orgName, "UTF-8") + " org");
+                log.info(localLogPrefix + "Please check if you have the access to " + URLEncoder.encode(this.orgName, "UTF-8") + " org");
             } catch (UnsupportedEncodingException e1) {
                 e1.printStackTrace();
             }
@@ -239,7 +239,7 @@ public class CloudPublisher  {
     }
 
     private boolean createIntegration(String jenkinsId) {
-    	logPrefix= logPrefix + "createIntegration ";
+    	String localLogPrefix= logPrefix + "createIntegration ";
         String resStr = "";
 
         try {
@@ -272,19 +272,19 @@ public class CloudPublisher  {
             if (response.getStatusLine().toString().contains("200") || response.getStatusLine().toString().contains("201")) {
                 // get 200 response
                 log.info("===================================================");
-                log.info(logPrefix + "Created integration successfully");
+                log.info(localLogPrefix + "Created integration successfully");
                 return true;
 
             } else {
                 // if gets error status
-                log.error(logPrefix + "Error: Failed to create integration, response status " + response.getStatusLine());
+                log.error(localLogPrefix + "Error: Failed to create integration, response status " + response.getStatusLine());
             }
         } catch (JsonSyntaxException e) {
-            log.error(logPrefix + "Invalid Json response, response: " + resStr);
+            log.error(localLogPrefix + "Invalid Json response, response: " + resStr);
         } catch (IllegalStateException e) {
             // will be triggered when 403 Forbidden
             try {
-                log.error(logPrefix + "Please check if you have the access to " + URLEncoder.encode(this.orgName, "UTF-8") + " org");
+                log.error(localLogPrefix + "Please check if you have the access to " + URLEncoder.encode(this.orgName, "UTF-8") + " org");
             } catch (UnsupportedEncodingException e1) {
                 e1.printStackTrace();
             }

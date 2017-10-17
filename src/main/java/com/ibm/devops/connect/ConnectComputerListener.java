@@ -20,6 +20,8 @@ public class ConnectComputerListener extends ComputerListener {
 	public static final Logger log = LoggerFactory.getLogger(ConnectComputerListener.class);
     private String logPrefix= "[IBM Cloud DevOps] ConnectComputerListener#";
     
+    private static CloudSocketComponent cloudSocketInstance;
+
     @Override
     public void onOnline(Computer c) {
         String url = getConnectUrl();
@@ -27,12 +29,21 @@ public class ConnectComputerListener extends ComputerListener {
     	logPrefix= logPrefix + "onOnline ";
 
         CloudWorkListener listener = new CloudWorkListener();
-        CloudSocketComponent socket = new CloudSocketComponent(listener, url);
+
+        if(cloudSocketInstance != null && cloudSocketInstance.connected()) {
+            cloudSocketInstance.disconnect();
+        }
+
+        cloudSocketInstance = new CloudSocketComponent(listener, url);
 
         try {
         	log.info(logPrefix + "Connecting to Cloud Services...");
-            socket.connectToCloudServices();
-            log.info(logPrefix + "Connected to Cloud Services!");
+            getCloudSocketInstance().connectToCloudServices();
+            if(getCloudSocketInstance().connected()) {
+                log.info(logPrefix + "Connected to Cloud Services!");
+            } else {
+                log.warn(logPrefix + "Failed to connected to Cloud Services");
+            }
         } catch (Exception e) {
             log.error(logPrefix + "Exception caught while connecting to Cloud Services: " + e);
         }
@@ -40,5 +51,9 @@ public class ConnectComputerListener extends ComputerListener {
 
     private String getConnectUrl() {
         return "https://uccloud-connect-stage1.stage1.mybluemix.net";
+    }
+
+    public CloudSocketComponent getCloudSocketInstance() {
+        return ConnectComputerListener.cloudSocketInstance;
     }
 }

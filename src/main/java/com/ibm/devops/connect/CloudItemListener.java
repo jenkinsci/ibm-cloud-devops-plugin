@@ -68,9 +68,13 @@ public class CloudItemListener extends ItemListener {
     	log.info(logPrefix + "Building the list of Jenkins jobs...");
     	List<Item> allProjects= JenkinsServer.getAllItems();
     	List<JSONObject> allJobs = new ArrayList<JSONObject>();
+        
+        CloudPublisher cloudPublisher = new CloudPublisher();
     	for (Item anItem : allProjects) {
     		JenkinsJob jenkinsJob= new JenkinsJob(anItem);
     		allJobs.add(jenkinsJob.toJson());
+
+            cloudPublisher.uploadJobInfo(jenkinsJob.toJson());
 		}
     	return allJobs;
     }

@@ -10,6 +10,9 @@ import java.util.ArrayList;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONArray;
 
+/**
+* This is the cause object that is attached to a build if it is started by the IBM Cloud.
+*/
 public class CloudCause extends Cause {
 
     public enum JobStatus {

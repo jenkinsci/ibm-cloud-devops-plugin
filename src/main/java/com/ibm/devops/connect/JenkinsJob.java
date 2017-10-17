@@ -18,6 +18,10 @@ import hudson.model.*;
 import hudson.model.Item;
 import hudson.model.ParametersDefinitionProperty;
 import hudson.model.queue.SubTask;
+import hudson.model.ChoiceParameterDefinition;
+import hudson.model.PasswordParameterDefinition;
+import com.cloudbees.plugins.credentials.CredentialsParameterDefinition;
+import hudson.model.BooleanParameterDefinition;
 
 import java.util.Collection;
 
@@ -101,14 +105,23 @@ public class JenkinsJob {
 				if (action instanceof ParametersDefinitionProperty) {
 					List<ParameterDefinition> paraDefs = ((ParametersDefinitionProperty)action).getParameterDefinitions();
 					for (ParameterDefinition paramDef : paraDefs) {
+						
+						// System.out.println(paramDef.getClass() + "\t - \t" + paramDef.getType());
 
 						JSONObject paramDefObj = new JSONObject();
 						paramDefObj.put("name", paramDef.getName());
 						paramDefObj.put("type", paramDef.getType());
 						paramDefObj.put("defaultValue", paramDef.getDefaultParameterValue().getValue());
 
+						if(paramDef instanceof ChoiceParameterDefinition) {
+							List<String> options = ((ChoiceParameterDefinition)paramDef).getChoices();
+
+							paramDefObj.put("options", options);
+						}
+
 						result.add(paramDefObj);
 					}
+
 					break;
 				}
 			}

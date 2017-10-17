@@ -16,11 +16,19 @@ package com.ibm.devops.dra;
 
 import hudson.CopyOnWrite;
 import hudson.Extension;
+import hudson.model.Computer;
 import hudson.util.ListBoxModel;
 import jenkins.model.GlobalConfiguration;
 import net.sf.json.JSONObject;
 import org.kohsuke.stapler.StaplerRequest;
+import org.kohsuke.stapler.QueryParameter;
+import org.kohsuke.stapler.StaplerResponse;
+import hudson.util.FormFieldValidator;
+import com.ibm.devops.connect.CloudSocketComponent;
+import com.ibm.devops.connect.ConnectComputerListener;
 
+import java.io.IOException;
+import javax.servlet.ServletException;
 /**
  * Created by lix on 7/20/17.
  */
@@ -93,6 +101,9 @@ public class DevOpsGlobalConfiguration extends GlobalConfiguration {
         syncToken = formData.getString("syncToken");
         instanceName = formData.getString("instanceName");
         save();
+
+        reconnectCloudSocket();
+
         return super.configure(req,formData);
     }
 
@@ -100,5 +111,26 @@ public class DevOpsGlobalConfiguration extends GlobalConfiguration {
     public ListBoxModel doFillRegionItems() {
         ListBoxModel items = new ListBoxModel();
         return items;
+    }
+
+    @Deprecated
+    public void doTestConnection(StaplerRequest req, StaplerResponse rsp) throws IOException, ServletException {
+        new FormFieldValidator(req, rsp, true) {
+            @Override
+            protected void check() throws IOException, ServletException {
+                CloudSocketComponent socket = new ConnectComputerListener().getCloudSocketInstance();
+                if(socket.connected()) {
+                    ok("Success - Connected to IBM Cloud Service");
+                } else {
+                    error("Not connected to IBM Cloud Services - Please ensure that current values are applied");
+                }
+            }
+        }.process();
+    }
+
+    private void reconnectCloudSocket() {
+        ConnectComputerListener connectComputerListener = new ConnectComputerListener();
+
+        connectComputerListener.onOnline(Computer.currentComputer());
     }
 }

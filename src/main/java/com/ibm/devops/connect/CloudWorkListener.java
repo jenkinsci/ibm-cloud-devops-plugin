@@ -34,6 +34,7 @@ import hudson.model.ParameterValue;
 import hudson.model.StringParameterValue;
 import hudson.model.queue.QueueTaskFuture;
 import hudson.model.Queue;
+import hudson.model.Item;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -41,6 +42,14 @@ import java.util.Iterator;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.lang.InterruptedException;
+
+import org.jenkinsci.plugins.workflow.job.WorkflowJob;
+
+//////TEMP
+
+import hudson.ExtensionList;
+import hudson.ExtensionPoint;
+import org.jenkinsci.plugins.workflow.flow.FlowExecutionListener;
 
 /*
  * When Spring is applying the @Transactional annotation, it creates a proxy class which wraps your class.
@@ -75,7 +84,9 @@ public class CloudWorkListener implements IWorkListener {
             if (incomingJob.has("fullName")) {
                 String fullName = incomingJob.get("fullName").toString();
                 Jenkins myJenkins = Jenkins.getInstance();
-                AbstractProject abstractProject = (AbstractProject)myJenkins.getItem(fullName);
+
+                Item item = myJenkins.getItem(fullName);
+
                 ArrayList<ParameterValue> parametersList = new ArrayList<ParameterValue>();
 
                 if(incomingJob.has("props")) {
@@ -94,8 +105,24 @@ public class CloudWorkListener implements IWorkListener {
                     returnProps = incomingJob.getJSONObject("returnProps");
                 }
 
-                Queue.Item queueItem = ParameterizedJobMixIn.scheduleBuild2(abstractProject, 0, new ParametersAction(parametersList), new CauseAction(
-                    new CloudCause(socket, incomingJob.get("id").toString(), returnProps) ));
+                System.out.println("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ " + Jenkins.VERSION);
+                for (FlowExecutionListener listener : ExtensionList.lookup(FlowExecutionListener.class)) {
+                    System.out.println(listener.getClass());
+                    System.out.println("^^^^^^");
+                }
+
+
+                if(item instanceof AbstractProject) {
+                    AbstractProject abstractProject = (AbstractProject)item;
+
+                    ParameterizedJobMixIn.scheduleBuild2(abstractProject, 0, new ParametersAction(parametersList), new CauseAction(new CloudCause(socket, incomingJob.get("id").toString(), returnProps)));
+                } else if (item instanceof WorkflowJob) {
+                    WorkflowJob workflowJob = (WorkflowJob)item;
+
+                    workflowJob.scheduleBuild2(0, new ParametersAction(parametersList), new CauseAction(new CloudCause(socket, incomingJob.get("id").toString(), returnProps) ));
+                } else {
+                    log.warn("Unhandled job type found: " + item.getClass());
+                }
 
             }
 
