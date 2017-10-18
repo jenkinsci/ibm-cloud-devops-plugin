@@ -111,6 +111,7 @@ public class JenkinsJob {
 						JSONObject paramDefObj = new JSONObject();
 						paramDefObj.put("name", paramDef.getName());
 						paramDefObj.put("type", paramDef.getType());
+						paramDefObj.put("description", paramDef.getDescription());
 						paramDefObj.put("defaultValue", paramDef.getDefaultParameterValue().getValue());
 
 						if(paramDef instanceof ChoiceParameterDefinition) {

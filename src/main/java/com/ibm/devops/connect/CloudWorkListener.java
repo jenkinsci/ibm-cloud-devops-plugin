@@ -32,12 +32,20 @@ import hudson.model.ParametersAction;
 import hudson.model.CauseAction;
 import hudson.model.ParameterValue;
 import hudson.model.StringParameterValue;
+import hudson.model.BooleanParameterValue;
+import hudson.model.TextParameterValue;
+import hudson.model.PasswordParameterValue;
 import hudson.model.queue.QueueTaskFuture;
 import hudson.model.Queue;
 import hudson.model.Item;
+import hudson.model.ParameterDefinition;
+import hudson.model.ParametersDefinitionProperty;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
@@ -87,30 +95,12 @@ public class CloudWorkListener implements IWorkListener {
 
                 Item item = myJenkins.getItem(fullName);
 
-                ArrayList<ParameterValue> parametersList = new ArrayList<ParameterValue>();
-
-                if(incomingJob.has("props")) {
-                    JSONObject props = incomingJob.getJSONObject("props");
-                    Iterator<String> keys = props.keys();
-
-                    while( keys.hasNext() ) {
-                        String key = (String)keys.next();
-
-                        parametersList.add(new StringParameterValue(key, props.get(key).toString()));
-                    }
-                }
+                List<ParameterValue> parametersList = generateParamList(incomingJob, getParameterTypeMap(item));
 
                 JSONObject returnProps = new JSONObject();
                 if(incomingJob.has("returnProps")) {
                     returnProps = incomingJob.getJSONObject("returnProps");
                 }
-
-                System.out.println("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ " + Jenkins.VERSION);
-                for (FlowExecutionListener listener : ExtensionList.lookup(FlowExecutionListener.class)) {
-                    System.out.println(listener.getClass());
-                    System.out.println("^^^^^^");
-                }
-
 
                 if(item instanceof AbstractProject) {
                     AbstractProject abstractProject = (AbstractProject)item;
@@ -142,5 +132,54 @@ public class CloudWorkListener implements IWorkListener {
             throw new RuntimeException("Error constructing work result JSON", e);
         }
         socket.emit("set_work_status", json.toString());
+    }
+
+    private List<ParameterValue> generateParamList (JSONObject incomingJob, Map<String, String> typeMap) {
+        ArrayList<ParameterValue> result = new ArrayList<ParameterValue>();
+
+        if(incomingJob.has("props")) {
+            JSONObject props = incomingJob.getJSONObject("props");
+            Iterator<String> keys = props.keys();
+            while( keys.hasNext() ) {
+                String key = (String)keys.next();
+                Object value = props.get(key);
+                String type = typeMap.get(key);
+
+                ParameterValue paramValue;
+
+                if(type == null) {
+
+                } else if(type.equalsIgnoreCase("BooleanParameterDefinition")) {
+                    result.add(new BooleanParameterValue(key, (boolean)props.get(key)));
+                } else if(type.equalsIgnoreCase("PasswordParameterDefinition")) {
+                    result.add(new PasswordParameterValue(key, props.get(key).toString()));
+                } else if(type.equalsIgnoreCase("TextParameterDefinition")) {
+                    result.add(new TextParameterValue(key, props.get(key).toString()));
+                } else {
+                    result.add(new StringParameterValue(key, props.get(key).toString()));
+                }
+            }
+        }
+
+        return result;
+    }
+
+    private Map<String, String> getParameterTypeMap(Item item) {
+        Map<String, String> result = new HashMap<String, String>();
+
+        if(item instanceof AbstractProject) {
+            List<Action> actions = ((AbstractProject)item).getActions();
+
+			for(Action action : actions) {
+				if (action instanceof ParametersDefinitionProperty) {
+					List<ParameterDefinition> paraDefs = ((ParametersDefinitionProperty)action).getParameterDefinitions();
+					for (ParameterDefinition paramDef : paraDefs) {
+                        result.put(paramDef.getName(), paramDef.getType());
+					}
+				}
+			}
+        }
+
+        return result;
     }
 }
