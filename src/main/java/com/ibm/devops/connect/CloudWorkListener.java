@@ -88,7 +88,13 @@ public class CloudWorkListener implements IWorkListener {
 
         for(int i=0; i < incomingJobs.size(); i++) {
             JSONObject incomingJob = incomingJobs.getJSONObject(i);
-
+            // sample job creation request from a toolchain
+            if (incomingJob.has("jobType") && "new".equalsIgnoreCase(incomingJob.get("jobType").toString())) {
+            	log.info(logPrefix + "Job creation request received.");
+            	// delegating job creation to the Jenkins server
+            	JenkinsServer.createJob(incomingJob);
+        	}
+            
             if (incomingJob.has("fullName")) {
                 String fullName = incomingJob.get("fullName").toString();
                 Jenkins myJenkins = Jenkins.getInstance();
