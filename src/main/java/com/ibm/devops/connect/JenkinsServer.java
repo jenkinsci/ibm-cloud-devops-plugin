@@ -16,6 +16,11 @@ package com.ibm.devops.connect;
 
 import com.cloudbees.hudson.plugins.folder.Folder;
 
+import com.cloudbees.plugins.credentials.*;
+import com.cloudbees.plugins.credentials.common.*;
+import com.cloudbees.plugins.credentials.domains.*;
+import com.cloudbees.plugins.credentials.impl.*;
+
 import hudson.model.*;
 import hudson.model.Item;
 import hudson.model.TopLevelItem;
@@ -42,9 +47,14 @@ public class JenkinsServer {
 	public static final Logger log = LoggerFactory.getLogger(JenkinsServer.class);
     private static String logPrefix= "[IBM Cloud DevOps] JenkinsServer#";
     
+    // creds
+    private static String BLX_CREDS= "IBM_CLOUD_DEVOPS_CREDS_API";
+    private static String BLX_CREDS_DESC= "IBM DevOps Bluemix credentials";
+    // folder and job
     private static String FOLDER_SPEC= "<?xml version=\"1.0\" encoding=\"UTF-8\"?><com.cloudbees.hudson.plugins.folder.Folder plugin=\"cloudbees-folder\"><description>Folder created by the IBM Devops plugin</description></com.cloudbees.hudson.plugins.folder.Folder>";
     private static String jobSrc= "<?xml version='1.0' encoding='UTF-8'?>\r\n<flow-definition plugin=\"workflow-job@2.10\">\r\n    <description></description>\r\n    <keepDependencies>false</keepDependencies>\r\n    <properties>\r\n        <org.jenkinsci.plugins.workflow.job.properties.PipelineTriggersJobProperty>\r\n            <triggers>\r\n                <hudson.triggers.SCMTrigger>\r\n                    <spec>* * * * *</spec>\r\n                    <ignorePostCommitHooks>false</ignorePostCommitHooks>\r\n                </hudson.triggers.SCMTrigger>\r\n            </triggers>\r\n        </org.jenkinsci.plugins.workflow.job.properties.PipelineTriggersJobProperty>\r\n    </properties>\r\n    <definition class=\"org.jenkinsci.plugins.workflow.cps.CpsScmFlowDefinition\" plugin=\"workflow-cps@2.30\">\r\n        <scm class=\"hudson.plugins.git.GitSCM\" plugin=\"git@3.3.0\">\r\n            <configVersion>2</configVersion>\r\n            <userRemoteConfigs>\r\n                <hudson.plugins.git.UserRemoteConfig>\r\n                    <url>https://github.com/ejodet/discovery-nodejs</url>\r\n                </hudson.plugins.git.UserRemoteConfig>\r\n            </userRemoteConfigs>\r\n            <branches>\r\n                <hudson.plugins.git.BranchSpec>\r\n                    <name>*/mastertoto</name>\r\n                </hudson.plugins.git.BranchSpec>\r\n            </branches>\r\n            <doGenerateSubmoduleConfigurations>false</doGenerateSubmoduleConfigurations>\r\n            <submoduleCfg class=\"list\"/>\r\n            <extensions/>\r\n        </scm>\r\n        <scriptPath>Jenkinsfile</scriptPath>\r\n        <lightweight>true</lightweight>\r\n    </definition>\r\n    <triggers/>\r\n</flow-definition>";
-	// not used yet - but might be used later
+	
+    // not used yet - but might be used later
     public static Collection<String> getJobNames() {
     	log.info(logPrefix + "getJobNames - get the list of job names");
     	Collection<String> allJobNames= Jenkins.getInstance().getJobNames();
@@ -69,6 +79,8 @@ public class JenkinsServer {
         	// temporarily disable security as we are not allowed to create jobs as anonymous
         	disableSecurity();
     		try {
+    			// create creds if necessary
+    			createCredentials(newJob) ;
     			JSONObject props = newJob.getJSONObject("props");
     			// create folder
     			String folderName= props.get("folderName").toString();
@@ -94,8 +106,28 @@ public class JenkinsServer {
         } 
     }
     
+    private static void createCredentials(JSONObject newJob) {
+    	if(newJob.has("props")) {
+            JSONObject props = newJob.getJSONObject("props");
+            if (props.has("userName") && props.has("password")) { // not all jobs require creds creation
+        		try {
+                	log.debug(logPrefix + "createCredentials - creating " + BLX_CREDS + " credentials.");
+        			Credentials creds = (Credentials) new UsernamePasswordCredentialsImpl(CredentialsScope.GLOBAL, BLX_CREDS, BLX_CREDS_DESC, props.get("userName").toString(), props.get("password").toString());
+        			SystemCredentialsProvider.getInstance().getCredentials().add(creds);
+        	        SystemCredentialsProvider.getInstance().save();
+        			log.debug(logPrefix + "createCredentials " + BLX_CREDS + " successfully created.");
+        		} catch (Exception e) {
+        			log.error(logPrefix + "createCredentials - unable to  create " + BLX_CREDS + " credentials.");
+        			e.printStackTrace();
+        		}
+            } else {
+            	log.debug(logPrefix + "createCredentials - credentials creation not required.");
+            }
+        }
+    }
+    
     private static boolean validCreationRequest(JSONObject newJob) {
-    	log.info(logPrefix + "validCreationRequest - Validating creation payload.");
+    	log.debug(logPrefix + "validCreationRequest - Validating creation payload.");
     	boolean valid= false;
     	if(newJob.has("props")) {
             JSONObject props = newJob.getJSONObject("props");
@@ -110,7 +142,7 @@ public class JenkinsServer {
     }
     
     private static void createFolder(String folderName) {
-    	log.info(logPrefix + "createFolder - Creating folder " + folderName);
+    	log.debug(logPrefix + "createFolder - Creating folder " + folderName);
     	try {
     		Jenkins.getInstance().createProjectFromXML(folderName, new ByteArrayInputStream(FOLDER_SPEC.getBytes()));
     		log.debug(logPrefix + folderName + " was created successfully!");
@@ -122,7 +154,7 @@ public class JenkinsServer {
     }
     
     private static void createJobInFolder(Folder targetFolder, String jobName, String source) {
-    	log.info(logPrefix + "createItem - Creating job " + jobName);
+    	log.debug(logPrefix + "createItem - Creating job " + jobName);
     	try {
     		targetFolder.createProjectFromXML(jobName, new ByteArrayInputStream(source.getBytes()));
     		log.debug(logPrefix + jobName + " was created successfully!");
