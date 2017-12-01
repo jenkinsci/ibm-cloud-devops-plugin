@@ -30,11 +30,13 @@ import org.slf4j.LoggerFactory;
 
 import net.sf.json.JSONObject;
 
+import com.cloudbees.hudson.plugins.folder.Folder;
+
 @Extension
 public class CloudItemListener extends ItemListener {
 	public static final Logger log = LoggerFactory.getLogger(CloudItemListener.class);
 	private String logPrefix= "[IBM Cloud DevOps] CloudItemListener#";
-	
+
     public CloudItemListener(){
     	logPrefix= logPrefix + "CloudItemListener ";
     	log.info(logPrefix + "CloudItemListener started...");
@@ -45,36 +47,41 @@ public class CloudItemListener extends ItemListener {
     public void onCreated(Item item) {
         handleEvent(item, "CREATED");
     }
-    
+
     @Override
     public void onDeleted(Item item) {
         handleEvent(item, "DELETED");
     }
-    
+
     @Override
     public void onUpdated(Item item) {
         handleEvent(item, "UPDATED");
     }
 
     private void handleEvent(Item item, String phase) {
-    	JenkinsJob jenkinsJob= new JenkinsJob(item);    	
-        log.info(ToStringBuilder.reflectionToString(jenkinsJob.toJson()) + " was " + phase);
-        CloudPublisher cloudPublisher = new CloudPublisher();
-        cloudPublisher.uploadJobInfo(jenkinsJob.toJson());
+        if( !(item instanceof Folder) ) {
+            JenkinsJob jenkinsJob= new JenkinsJob(item);
+            log.info(ToStringBuilder.reflectionToString(jenkinsJob.toJson()) + " was " + phase);
+            CloudPublisher cloudPublisher = new CloudPublisher();
+            cloudPublisher.uploadJobInfo(jenkinsJob.toJson());
+        }
+
     	// we'll handle the updates to the sync app here
     }
-    
+
     private List<JSONObject> buildJobsList() {
     	log.info(logPrefix + "Building the list of Jenkins jobs...");
     	List<Item> allProjects= JenkinsServer.getAllItems();
     	List<JSONObject> allJobs = new ArrayList<JSONObject>();
-        
+
         CloudPublisher cloudPublisher = new CloudPublisher();
     	for (Item anItem : allProjects) {
-    		JenkinsJob jenkinsJob= new JenkinsJob(anItem);
-    		allJobs.add(jenkinsJob.toJson());
+            if( !(anItem instanceof Folder) ) {
+                JenkinsJob jenkinsJob= new JenkinsJob(anItem);
+                allJobs.add(jenkinsJob.toJson());
 
-            cloudPublisher.uploadJobInfo(jenkinsJob.toJson());
+                cloudPublisher.uploadJobInfo(jenkinsJob.toJson());
+            }
 		}
     	return allJobs;
     }

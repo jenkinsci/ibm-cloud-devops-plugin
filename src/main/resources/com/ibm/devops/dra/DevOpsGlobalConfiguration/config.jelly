@@ -38,14 +38,11 @@
         </f:entry>
     </f:section>
     <f:section title="IBM Cloud Connect Configuration">
-        <f:entry title="Instance Name" field="instanceName">
-            <f:textbox />
-        </f:entry>
         <f:entry title="Sync ID" field="syncId">
             <f:textbox />
         </f:entry>
         <f:entry title="Sync Token" field="syncToken">
-            <f:textbox />
+            <f:password />
         </f:entry>
         <f:entry title="">
             <div style="text-align: right">

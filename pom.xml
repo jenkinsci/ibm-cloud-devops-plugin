@@ -61,6 +61,7 @@
       <id>maven.jenkins-ci.org</id>
       <url>https://repo.jenkins-ci.org/snapshots/</url>
     </snapshotRepository>
+
   </distributionManagement>
 
   <licenses>
@@ -106,16 +107,16 @@
 
   <repositories>
     <repository>
+      <id>Local repository</id>
+      <url>file://${basedir}/lib</url>
+    </repository>
+    <repository>
       <id>repo.jenkins-ci.org</id>
       <url>https://repo.jenkins-ci.org/public/</url>
     </repository>
     <!-- A CF Java client shaded library is pre-installed in a local repository
          to allow building the project in a single 'mvn clean install'.
          See README.md for more details. -->
-    <repository>
-      <id>Local repository</id>
-      <url>file://${basedir}/lib</url>
-    </repository>
     <repository>
       <id>spring-snapshots</id>
       <name>Spring Snapshots</name>
@@ -196,8 +197,9 @@
     </dependency>
     <dependency>
         <groupId>uc-cloud-connect-java</groupId>
-        <artifactId>uc-cloud-connect-java</artifactId>
-        <version>1.0-SNAPSHOT</version>
+        <artifactId>cloud-connect-java</artifactId>
+        <version>1.0.920563</version>
+        <scope>compile</scope>
     </dependency>
     <dependency>
         <groupId>org.apache.commons</groupId>
@@ -230,5 +232,10 @@
         <artifactId>workflow-api</artifactId>
         <version>2.22</version>
     </dependency>
+    <dependency>
+      <groupId>org.jenkins-ci.plugins</groupId>
+      <artifactId>cloudbees-folder</artifactId>
+      <version>6.0.0</version>
+  </dependency>
   </dependencies>
 </project>

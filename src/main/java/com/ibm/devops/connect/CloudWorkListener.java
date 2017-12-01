@@ -68,7 +68,7 @@ import org.jenkinsci.plugins.workflow.flow.FlowExecutionListener;
 public class CloudWorkListener implements IWorkListener {
 	public static final Logger log = LoggerFactory.getLogger(CloudWorkListener.class);
     private String logPrefix= "[IBM Cloud DevOps] CloudWorkListener#";
-    
+
     public CloudWorkListener() {
 
     }
@@ -91,9 +91,13 @@ public class CloudWorkListener implements IWorkListener {
 
             if (incomingJob.has("fullName")) {
                 String fullName = incomingJob.get("fullName").toString();
+
                 Jenkins myJenkins = Jenkins.getInstance();
 
                 Item item = myJenkins.getItem(fullName);
+                if(item == null) {
+                    item = myJenkins.getItemByFullName(fullName);
+                }
 
                 List<ParameterValue> parametersList = generateParamList(incomingJob, getParameterTypeMap(item));
 
@@ -110,6 +114,8 @@ public class CloudWorkListener implements IWorkListener {
                     WorkflowJob workflowJob = (WorkflowJob)item;
 
                     workflowJob.scheduleBuild2(0, new ParametersAction(parametersList), new CauseAction(new CloudCause(socket, incomingJob.get("id").toString(), returnProps) ));
+                } else if (item == null) {
+                    log.warn("No Item Found");
                 } else {
                     log.warn("Unhandled job type found: " + item.getClass());
                 }

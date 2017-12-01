@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory;
 public class ConnectComputerListener extends ComputerListener {
 	public static final Logger log = LoggerFactory.getLogger(ConnectComputerListener.class);
     private String logPrefix= "[IBM Cloud DevOps] ConnectComputerListener#";
-    
+
     private static CloudSocketComponent cloudSocketInstance;
 
     @Override
@@ -50,7 +50,8 @@ public class ConnectComputerListener extends ComputerListener {
     }
 
     private String getConnectUrl() {
-        return "https://uccloud-connect-stage1.stage1.mybluemix.net";
+        EndpointManager em = new EndpointManager();
+        return em.getConnectEndpoint();
     }
 
     public CloudSocketComponent getCloudSocketInstance() {

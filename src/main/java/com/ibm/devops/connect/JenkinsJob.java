@@ -47,7 +47,7 @@ import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 public class JenkinsJob {
 	final private Item item;
 	public static final Logger log = LoggerFactory.getLogger(JenkinsJob.class);
-	
+
 	public JenkinsJob (Item item) {
 		this.item= item;
 	}
@@ -63,12 +63,13 @@ public class JenkinsJob {
 		String name= this.item.getName();
 		String fullName= this.item.getFullName();
 		String jobUrl= this.item.getUrl();
-		
+
 		JSONObject jobToJson = new JSONObject();
-		jobToJson.put("displayName", this.item.getDisplayName());
-		jobToJson.put("name", this.item.getName());
-		jobToJson.put("fullName", this.item.getFullName());
-		jobToJson.put("jobUrl", this.item.getUrl());
+		jobToJson.put("displayName", displayName);
+		jobToJson.put("name", name);
+		jobToJson.put("fullName", fullName);
+		jobToJson.put("jobUrl", jobUrl);
+		jobToJson.put("jenkinsClass", this.item.getClass());
 
 		String jobId;
 
@@ -81,13 +82,13 @@ public class JenkinsJob {
 
 		jobToJson.put("id", jobId);
 		jobToJson.put("instanceType", "JENKINS");
-		jobToJson.put("instanceName", Jenkins.getInstance().getDescriptorByType(DevOpsGlobalConfiguration.class).getInstanceName());
+		//jobToJson.put("instanceName", Jenkins.getInstance().getDescriptorByType(DevOpsGlobalConfiguration.class).getInstanceName());
 
 		if(this.item instanceof WorkflowJob) {
 			jobToJson.put("isPipeline", true);
 			// TODO: Find a way to get Stage definitions
 		} else {
-			jobToJson.put("isPipeline", false);	
+			jobToJson.put("isPipeline", false);
 		}
 
 		jobToJson.put("params", getJobParams());
@@ -105,14 +106,14 @@ public class JenkinsJob {
 				if (action instanceof ParametersDefinitionProperty) {
 					List<ParameterDefinition> paraDefs = ((ParametersDefinitionProperty)action).getParameterDefinitions();
 					for (ParameterDefinition paramDef : paraDefs) {
-						
-						// System.out.println(paramDef.getClass() + "\t - \t" + paramDef.getType());
-
 						JSONObject paramDefObj = new JSONObject();
 						paramDefObj.put("name", paramDef.getName());
 						paramDefObj.put("type", paramDef.getType());
 						paramDefObj.put("description", paramDef.getDescription());
-						paramDefObj.put("defaultValue", paramDef.getDefaultParameterValue().getValue());
+						ParameterValue pValue = paramDef.getDefaultParameterValue();
+						if (pValue != null) {
+							paramDefObj.put("defaultValue", pValue.getValue());
+						}
 
 						if(paramDef instanceof ChoiceParameterDefinition) {
 							List<String> options = ((ChoiceParameterDefinition)paramDef).getChoices();

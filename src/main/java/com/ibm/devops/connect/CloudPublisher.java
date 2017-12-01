@@ -30,6 +30,7 @@ import jenkins.tasks.SimpleBuildStep;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -89,17 +90,16 @@ public class CloudPublisher  {
     private String buildNumber;
 
     public CloudPublisher() {
-
     }
 
     private String getSyncApiUrl() {
-        // return "http://localhost:6002/";
-
-        return "https://ucreporting-sync-api-stage1.stage1.mybluemix.net/";
+        EndpointManager em = new EndpointManager();
+        return em.getSyncApiEndpoint();
     }
 
     private String getSyncStoreUrl() {
-        return "https://uccloud-sync-store-stage1.stage1.mybluemix.net/";
+        EndpointManager em = new EndpointManager();
+        return em.getSyncStoreEndpoint();
     }
 
     /**
@@ -128,7 +128,7 @@ public class CloudPublisher  {
 
         try {
             CloseableHttpClient httpClient = HttpClients.createDefault();
-            
+
             String jenkinsId;
 
             if (IdStore.getId(Jenkins.getInstance()) != null) {
@@ -210,11 +210,20 @@ public class CloudPublisher  {
             if (response.getStatusLine().toString().contains("200") || response.getStatusLine().toString().contains("201")) {
                 // get 200 response
                 log.info(localLogPrefix + "Integration was retrieved");
+
+                JSONObject jsonBody = JSONObject.fromObject(resStr);
+
+                String serverUrl = Jenkins.getInstance().getRootUrl();
+
+                if(!serverUrl.equals(jsonBody.get("serverUrl"))) {
+                    log.info(localLogPrefix + "Must update server url on integration...");
+                    updateIntegrationServerUrl(jsonBody, serverUrl);
+                }
+
                 return true;
 
             } else {
                 // if gets error status
-                log.info("--------------------------------------------");
                 log.info(localLogPrefix + "No Integration Retrieved");
                 log.info(localLogPrefix + "Attempting to create a new integration");
                 return this.createIntegration(jenkinsId);
@@ -254,6 +263,7 @@ public class CloudPublisher  {
             newIntegration.put("id", jenkinsId);
             newIntegration.put("dateCreated", System.currentTimeMillis());
             newIntegration.put("docType", "integration");
+            newIntegration.put("serverUrl", Jenkins.getInstance().getRootUrl());
 
             HttpPost postMethod = new HttpPost(url);
             // postMethod = addProxyInformation(postMethod);
@@ -281,6 +291,56 @@ public class CloudPublisher  {
             }
         } catch (JsonSyntaxException e) {
             log.error(localLogPrefix + "Invalid Json response, response: " + resStr);
+        } catch (IllegalStateException e) {
+            // will be triggered when 403 Forbidden
+            try {
+                log.error(localLogPrefix + "Please check if you have the access to " + URLEncoder.encode(this.orgName, "UTF-8") + " org");
+            } catch (UnsupportedEncodingException e1) {
+                e1.printStackTrace();
+            }
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        } catch (ClientProtocolException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    private boolean updateIntegrationServerUrl(JSONObject payload, String newServerUrl) {
+    	String localLogPrefix= logPrefix + "updateIntegrationServerUrl ";
+
+        try {
+            CloseableHttpClient httpClient = HttpClients.createDefault();
+
+            String url = this.getSyncStoreUrl() + INTEGRATIONS_ENDPOINT_URL;
+
+            payload.put("serverUrl", newServerUrl);
+
+            HttpPost putMethod = new HttpPost(url);
+            // putMethod = addProxyInformation(putMethod);
+            putMethod.setHeader("Content-Type", "application/json");
+            String authEncoding = DatatypeConverter.printBase64Binary((Jenkins.getInstance().getDescriptorByType(DevOpsGlobalConfiguration.class).getSyncId() + ":" + Jenkins.getInstance().getDescriptorByType(DevOpsGlobalConfiguration.class).getSyncToken()).getBytes("UTF-8"));
+            putMethod.setHeader("Authorization", "Basic " + authEncoding);
+
+            putMethod.setHeader("syncId", Jenkins.getInstance().getDescriptorByType(DevOpsGlobalConfiguration.class).getSyncId());
+
+            StringEntity data = new StringEntity(payload.toString());
+            putMethod.setEntity(data);
+
+            CloseableHttpResponse response = httpClient.execute(putMethod);
+
+            if (response.getStatusLine().toString().contains("200") || response.getStatusLine().toString().contains("201")) {
+                log.info(localLogPrefix + "Upated integration successfully");
+                return true;
+
+            } else {
+                // if gets error status
+                log.error(localLogPrefix + "Error: Failed to update integration, response status " + response.getStatusLine());
+            }
+        } catch (JsonSyntaxException e) {
+            log.error(localLogPrefix + "Invalid Json response, response");
         } catch (IllegalStateException e) {
             // will be triggered when 403 Forbidden
             try {
