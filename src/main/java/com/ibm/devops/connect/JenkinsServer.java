@@ -25,6 +25,10 @@ import hudson.model.*;
 import hudson.model.Item;
 import hudson.model.TopLevelItem;
 
+import hudson.security.AuthorizationStrategy;
+import hudson.security.FullControlOnceLoggedInAuthorizationStrategy;
+import hudson.security.SecurityRealm;
+
 import java.io.ByteArrayInputStream;
 import java.util.Collection;
 import java.util.Iterator;
@@ -54,28 +58,60 @@ public class JenkinsServer {
     private static String FOLDER_SPEC= "<?xml version=\"1.0\" encoding=\"UTF-8\"?><com.cloudbees.hudson.plugins.folder.Folder plugin=\"cloudbees-folder\"><description>Folder created by the IBM Devops plugin</description></com.cloudbees.hudson.plugins.folder.Folder>";
     private static String jobSrc= "<?xml version='1.0' encoding='UTF-8'?>\r\n<flow-definition plugin=\"workflow-job@2.10\">\r\n    <description></description>\r\n    <keepDependencies>false</keepDependencies>\r\n    <properties>\r\n        <org.jenkinsci.plugins.workflow.job.properties.PipelineTriggersJobProperty>\r\n            <triggers>\r\n                <hudson.triggers.SCMTrigger>\r\n                    <spec>* * * * *</spec>\r\n                    <ignorePostCommitHooks>false</ignorePostCommitHooks>\r\n                </hudson.triggers.SCMTrigger>\r\n            </triggers>\r\n        </org.jenkinsci.plugins.workflow.job.properties.PipelineTriggersJobProperty>\r\n    </properties>\r\n    <definition class=\"org.jenkinsci.plugins.workflow.cps.CpsScmFlowDefinition\" plugin=\"workflow-cps@2.30\">\r\n        <scm class=\"hudson.plugins.git.GitSCM\" plugin=\"git@3.3.0\">\r\n            <configVersion>2</configVersion>\r\n            <userRemoteConfigs>\r\n                <hudson.plugins.git.UserRemoteConfig>\r\n                    <url>https://github.com/ejodet/discovery-nodejs</url>\r\n                </hudson.plugins.git.UserRemoteConfig>\r\n            </userRemoteConfigs>\r\n            <branches>\r\n                <hudson.plugins.git.BranchSpec>\r\n                    <name>*/mastertoto</name>\r\n                </hudson.plugins.git.BranchSpec>\r\n            </branches>\r\n            <doGenerateSubmoduleConfigurations>false</doGenerateSubmoduleConfigurations>\r\n            <submoduleCfg class=\"list\"/>\r\n            <extensions/>\r\n        </scm>\r\n        <scriptPath>Jenkinsfile</scriptPath>\r\n        <lightweight>true</lightweight>\r\n    </definition>\r\n    <triggers/>\r\n</flow-definition>";
 	
-    // not used yet - but might be used later
     public static Collection<String> getJobNames() {
-    	log.info(logPrefix + "getJobNames - get the list of job names");
+    	log.debug(logPrefix + "getJobNames - get the list of job names");
     	Collection<String> allJobNames= Jenkins.getInstance().getJobNames();
-    	log.info(logPrefix + "getJobNames - retrieved " + allJobNames.size() + " JobNames");
+    	log.debug(logPrefix + "getJobNames - retrieved " + allJobNames.size() + " JobNames");
     	for (Iterator iterator = allJobNames.iterator(); iterator.hasNext();) {
     		String aJobName = (String) iterator.next(); 
-    		log.info(logPrefix + "job: " + aJobName);
+    		log.debug(logPrefix + "job: " + aJobName);
     	}
     	return Jenkins.getInstance().getJobNames();
     }
     
     public static List<Item> getAllItems() {
-    	log.info(logPrefix + "getAllItems - get the list of all items");
-    	List<AbstractItem> allProjects= Jenkins.getInstance().getAllItems(AbstractItem.class);
-    	log.info(logPrefix + "getAllItems - Retrieved " + allProjects.size() + " projects");
-    	return Jenkins.getInstance().getAllItems();
+    	log.debug(logPrefix + "getAllItems - get the list of all items");
+    	List<Item> allItems= Jenkins.getInstance().getAllItems();
+    	if (allItems.size() == 0) { // ensure we're able to list all items
+    		AuthorizationStrategy authorizationStrategy= Jenkins.getInstance().getAuthorizationStrategy();
+    		if (authorizationStrategy instanceof FullControlOnceLoggedInAuthorizationStrategy) {
+    			// allow anoymous read in order to get all items
+        		FullControlOnceLoggedInAuthorizationStrategy strat= (FullControlOnceLoggedInAuthorizationStrategy) authorizationStrategy;
+        		// remember previous settings
+        		boolean isAllowAnonymousRead= strat.isAllowAnonymousRead();
+        		strat.setAllowAnonymousRead(true);
+        		allItems= Jenkins.getInstance().getAllItems();
+        		strat.setAllowAnonymousRead(isAllowAnonymousRead);
+        		Jenkins.getInstance().setAuthorizationStrategy(strat);
+    		}
+    	}
+    	log.debug(logPrefix + "getAllItems - Retrieved " + allItems.size() + " projects");
+    	return allItems;
+    }
+    
+    public static Item getItemByName(String itemName) {
+    	log.info(logPrefix + "Retrieving project " + itemName);
+    	List<Item> allProjects= JenkinsServer.getAllItems();
+    	
+    	for (Item anItem : allProjects) {
+    		String aName = anItem.getFullName();
+    		log.info(logPrefix + "project " + aName);
+    		if (itemName.equals(aName)) {
+    			log.info(logPrefix + "Project " + itemName + " retrieved!");
+    			return anItem;
+    		}
+		}
+    	log.info(logPrefix + "Project " + itemName + " not found!");
+    	return null;
     }
     
     public static void createJob(JSONObject newJob) {
-    	log.info(logPrefix + "createJob - Creating a new job.");
+    	log.debug(logPrefix + "createJob - Creating a new job.");
     	if(validCreationRequest(newJob)) {
+    		// get current security settings
+    		SecurityRealm securityRealm= Jenkins.getInstance().getSecurityRealm();
+    		AuthorizationStrategy authorizationStrategy= Jenkins.getInstance().getAuthorizationStrategy();
+    		
         	// temporarily disable security as we are not allowed to create jobs as anonymous
         	disableSecurity();
     		try {
@@ -88,20 +124,27 @@ public class JenkinsServer {
     			// verify folder was created
     			Folder targetFolder= getFolder(folderName);
     			if (targetFolder == null) {
-    				log.info(logPrefix + "createJob - target folder not retrieved. Exiting creation process");
+    				log.debug(logPrefix + "createJob - target folder not retrieved. Exiting creation process");
     			} else {
-    				log.info(logPrefix + "createJob - target folder retrieved !!!!!");
+    				log.debug(logPrefix + "createJob - target folder retrieved !!!!!");
         			// create job in target folder
         			String jobSrc= props.get("source").toString();
         			String jobName= props.get("jobName").toString();
-        			createJobInFolder(targetFolder, jobName, jobSrc);
+        			Collection<String> existingJobs= getJobNames();
+        			if (existingJobs.contains(jobName)) {
+        				// do not create
+        				log.debug(logPrefix + "Job " + jobName + " already exists.");
+        			} else {
+        				createJobInFolder(targetFolder, jobName, jobSrc);
+        			}
     			}
     		} catch (Exception e) {
     			log.error(logPrefix + "An unexepected error occurred while creating job.");
                 e.printStackTrace();
             } finally {
             	// be sure to re-enable security
-            	reloadConfiguration();
+            	Jenkins.getInstance().setSecurityRealm(securityRealm);
+            	Jenkins.getInstance().setAuthorizationStrategy(authorizationStrategy);
             }
         } 
     }
@@ -149,7 +192,7 @@ public class JenkinsServer {
     	} catch (Exception e) {
     		// folder might be existing
     		log.debug(logPrefix + folderName + " was not created.");
-            e.printStackTrace();
+            // e.printStackTrace();
         }
     }
     
@@ -167,15 +210,6 @@ public class JenkinsServer {
     private static void disableSecurity() {
     	log.debug(logPrefix + "disableSecurity()");
     	Jenkins.getInstance().disableSecurity();
-    }
-    
-    private static void reloadConfiguration() {
-    	log.debug(logPrefix + "reloadConfiguration()");
-    	try {
-    		Jenkins.getInstance().reload();
-    	} catch (Exception e) {
-            e.printStackTrace();
-        }
     }
     
     private static Folder getFolder(String folderName) {
