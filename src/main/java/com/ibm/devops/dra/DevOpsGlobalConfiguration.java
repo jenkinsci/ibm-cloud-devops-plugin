@@ -14,6 +14,8 @@
 
 package com.ibm.devops.dra;
 
+import java.util.List;
+
 import hudson.CopyOnWrite;
 import hudson.Extension;
 import hudson.model.Computer;
@@ -23,9 +25,19 @@ import net.sf.json.JSONObject;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerResponse;
+import org.kohsuke.stapler.AncestorInPath;
 import hudson.util.FormFieldValidator;
 import com.ibm.devops.connect.CloudSocketComponent;
 import com.ibm.devops.connect.ConnectComputerListener;
+
+import com.cloudbees.plugins.credentials.CredentialsMatchers;
+import com.cloudbees.plugins.credentials.CredentialsProvider;
+import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
+import com.cloudbees.plugins.credentials.common.StandardUsernameCredentials;
+import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredentials;
+import com.cloudbees.plugins.credentials.domains.URIRequirementBuilder;
+import hudson.security.ACL;
+import jenkins.model.Jenkins;
 
 import java.io.IOException;
 import javax.servlet.ServletException;
@@ -40,6 +52,7 @@ public class DevOpsGlobalConfiguration extends GlobalConfiguration {
     private volatile boolean debug_mode;
     private volatile String syncId;
     private volatile String syncToken;
+    private String credentialsId;
 
     public DevOpsGlobalConfiguration() {
         load();
@@ -81,6 +94,15 @@ public class DevOpsGlobalConfiguration extends GlobalConfiguration {
         save();
     }
 
+    public String getCredentialsId() {
+        return credentialsId;
+    }
+
+    public void setCredentialsId(String crendentialsId) {
+        this.credentialsId = credentialsId;
+        save();
+    }
+
     @Override
     public boolean configure(StaplerRequest req, JSONObject formData) throws FormException {
         // To persist global configuration information,
@@ -89,6 +111,7 @@ public class DevOpsGlobalConfiguration extends GlobalConfiguration {
         debug_mode = Boolean.parseBoolean(formData.getString("debug_mode"));
         syncId = formData.getString("syncId");
         syncToken = formData.getString("syncToken");
+       credentialsId = formData.getString("credentialsId");
         save();
 
         reconnectCloudSocket();
@@ -111,10 +134,44 @@ public class DevOpsGlobalConfiguration extends GlobalConfiguration {
                 if(socket.connected()) {
                     ok("Success - Connected to IBM Cloud Service");
                 } else {
-                    error("Not connected to IBM Cloud Services - Please ensure that current values are applied");
+                    String cause = socket.getCauseOfFailure();
+                    if(cause != null) {
+                        error("Not connected to IBM Cloud Services - " + cause);
+                    } else {
+                        error("Not connected to IBM Cloud Services - Please ensure that the current values are applied");
+                    }
                 }
             }
         }.process();
+    }
+
+    /**
+    * This method is called to populate the credentials list on the Jenkins config page.
+    */
+    public ListBoxModel doFillCredentialsIdItems(@QueryParameter("target") final String target) {
+        StandardListBoxModel result = new StandardListBoxModel();
+        result.includeEmptyValue();
+        result.withMatching(CredentialsMatchers.instanceOf(StandardUsernamePasswordCredentials.class),
+                CredentialsProvider.lookupCredentials(
+                        StandardUsernameCredentials.class,
+                        Jenkins.getInstance(),
+                        ACL.SYSTEM,
+                        URIRequirementBuilder.fromUri(target).build()
+                )
+        );
+        return result;
+    }
+
+    public StandardUsernamePasswordCredentials getCredentialsObj() {
+        List<StandardUsernamePasswordCredentials> standardCredentials = CredentialsProvider.lookupCredentials(
+                    StandardUsernamePasswordCredentials.class,
+                    Jenkins.getInstance(),
+                    ACL.SYSTEM);
+
+        StandardUsernamePasswordCredentials credentials =
+                CredentialsMatchers.firstOrNull(standardCredentials, CredentialsMatchers.withId(this.credentialsId));
+
+        return credentials;
     }
 
     private void reconnectCloudSocket() {

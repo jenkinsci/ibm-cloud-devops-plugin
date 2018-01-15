@@ -53,6 +53,12 @@ import java.lang.InterruptedException;
 
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 
+import net.sf.json.JSONObject;
+
+import com.ibm.devops.connect.CloudCause.JobStatus;
+import com.ibm.devops.connect.SecuredAction.TriggerJob.TriggerJobParamObj;
+import com.ibm.devops.connect.SecuredAction.TriggerJob;
+
 //////TEMP
 
 import hudson.ExtensionList;
@@ -82,6 +88,13 @@ public class CloudWorkListener implements IWorkListener {
      */
     @Override
     public void call(ConnectSocket socket, String event, Object... args) {
+        TriggerJob triggerJob = new TriggerJob();
+
+        TriggerJobParamObj paramObj = triggerJob.new TriggerJobParamObj(socket, event, args);
+        triggerJob.runAsJenkinsUser(paramObj);
+    }
+
+    public void callSecured(ConnectSocket socket, String event, Object... args) {
         log.info(logPrefix + " Received event from Connect Socket");
 
         JSONArray incomingJobs = JSONArray.fromObject(args[0].toString());
@@ -94,15 +107,28 @@ public class CloudWorkListener implements IWorkListener {
             	// delegating job creation to the Jenkins server
             	JenkinsServer.createJob(incomingJob);
         	}
-            
+
+
             if (incomingJob.has("fullName")) {
                 String fullName = incomingJob.get("fullName").toString();
 
                 Jenkins myJenkins = Jenkins.getInstance();
 
+                // Get item by name
                 Item item = myJenkins.getItem(fullName);
+
+                log.info("Item Found (1): " + item);
+
+                // If item is not retrieved, get by full name
                 if(item == null) {
                     item = myJenkins.getItemByFullName(fullName);
+                    log.info("Item Found (2): " + item);
+                }
+
+                // If item is not retrieved, get by full name with escaped characters
+                if(item == null) {
+                    item = myJenkins.getItemByFullName(escapeItemName(fullName));
+                    log.info("Item Found (3): " + item);
                 }
 
                 List<ParameterValue> parametersList = generateParamList(incomingJob, getParameterTypeMap(item));
@@ -112,18 +138,39 @@ public class CloudWorkListener implements IWorkListener {
                     returnProps = incomingJob.getJSONObject("returnProps");
                 }
 
+                CloudCause cloudCause = new CloudCause(socket, incomingJob.get("id").toString(), returnProps);
+                Queue.Item queuedItem = null;
+                String errorMessage = null;
+
                 if(item instanceof AbstractProject) {
                     AbstractProject abstractProject = (AbstractProject)item;
 
-                    ParameterizedJobMixIn.scheduleBuild2(abstractProject, 0, new ParametersAction(parametersList), new CauseAction(new CloudCause(socket, incomingJob.get("id").toString(), returnProps)));
+                    queuedItem = ParameterizedJobMixIn.scheduleBuild2(abstractProject, 0, new ParametersAction(parametersList), new CauseAction(cloudCause));
+
+                    if (queuedItem == null) {
+                        errorMessage = "Could not start parameterized build.";
+                    }
                 } else if (item instanceof WorkflowJob) {
                     WorkflowJob workflowJob = (WorkflowJob)item;
 
-                    workflowJob.scheduleBuild2(0, new ParametersAction(parametersList), new CauseAction(new CloudCause(socket, incomingJob.get("id").toString(), returnProps) ));
+                    workflowJob.scheduleBuild2(0, new ParametersAction(parametersList), new CauseAction(cloudCause));
+
+                    if (queuedItem == null) {
+                        errorMessage = "Could not start pipeline build.";
+                    }
                 } else if (item == null) {
-                    log.warn("No Item Found");
+                    errorMessage = "No Item Found";
+                    log.warn(errorMessage);
                 } else {
-                    log.warn("Unhandled job type found: " + item.getClass());
+                    errorMessage = "Unhandled job type found: " + item.getClass();
+                    log.warn(errorMessage);
+                }
+
+                if( errorMessage != null ) {
+                    JenkinsJobStatus erroredJobStatus = new JenkinsJobStatus(null, cloudCause, null, true, true);
+                    JSONObject statusUpdate = erroredJobStatus.generateErrorStatus(errorMessage);
+                    CloudPublisher cloudPublisher = new CloudPublisher();
+                    cloudPublisher.uploadJobStatus(statusUpdate);
                 }
 
             }
@@ -162,7 +209,12 @@ public class CloudWorkListener implements IWorkListener {
                 if(type == null) {
 
                 } else if(type.equalsIgnoreCase("BooleanParameterDefinition")) {
-                    result.add(new BooleanParameterValue(key, (boolean)props.get(key)));
+                    if(props.get(key).getClass().equals(String.class)) {
+                        Boolean p = Boolean.parseBoolean((String)props.get(key));
+                        result.add(new BooleanParameterValue(key, p));
+                    } else {
+                        result.add(new BooleanParameterValue(key, (boolean)props.get(key)));
+                    }
                 } else if(type.equalsIgnoreCase("PasswordParameterDefinition")) {
                     result.add(new PasswordParameterValue(key, props.get(key).toString()));
                 } else if(type.equalsIgnoreCase("TextParameterDefinition")) {
@@ -193,5 +245,10 @@ public class CloudWorkListener implements IWorkListener {
         }
 
         return result;
+    }
+
+    private String escapeItemName(String itemName) {
+        String result = item.replace("\'", "&apos;");
+        return result
     }
 }

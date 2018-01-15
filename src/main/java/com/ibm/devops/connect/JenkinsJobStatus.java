@@ -61,7 +61,7 @@ public class JenkinsJobStatus {
 
     public JSONObject generate() {
         JSONObject result = new JSONObject();
-        
+
         evaluateSourceData(build, cloudCause);
 
         if(!(buildStep instanceof hudson.model.ParametersDefinitionProperty)) {
@@ -85,7 +85,7 @@ public class JenkinsJobStatus {
         // TODO: Premature success is causing successful results when job actually fails
         // System.out.println("\t\tRESULT \t IS BUILDING \t hasntStartedYet \t isCompleteBuild");
         // System.out.println("\t\t" + build.getResult() + "\t\t" + build.isBuilding() + "\t\t" + build.hasntStartedYet() + "\t\t" + (build.getResult() == null ? "IT was NULL" : build.getResult().isCompleteBuild()));
-        
+
         if (build.getResult() == null) {
             if(build.isBuilding()) {
                 result.put("status", JobStatus.started.toString());
@@ -110,6 +110,29 @@ public class JenkinsJobStatus {
         result.put("jobExternalId", getJobUniqueIdFromBuild(build));
 
         result.put("sourceData", cloudCause.getSourceDataJson());
+
+        return result;
+    }
+
+    public JSONObject generateErrorStatus(String errorMessage) {
+        JSONObject result = new JSONObject();
+
+        cloudCause.addStep("Error: " + errorMessage, JobStatus.failure.toString(), "Failed due to error", true);
+
+        result.put("status", JobStatus.failure.toString());
+        result.put("timestamp", System.currentTimeMillis());
+        result.put("syncId", Jenkins.getInstance().getDescriptorByType(DevOpsGlobalConfiguration.class).getSyncId());
+        result.put("steps", cloudCause.getStepsArray());
+        result.put("returnProps", cloudCause.getReturnProps());
+
+        if(build != null) {
+            result.put("url", Jenkins.getInstance().getRootUrl() + build.getUrl());
+            result.put("jobExternalId", getJobUniqueIdFromBuild(build));
+            result.put("name", build.getDisplayName());
+        } else {
+            result.put("url", Jenkins.getInstance().getRootUrl());
+            result.put("name", "Job Error");
+        }
 
         return result;
     }

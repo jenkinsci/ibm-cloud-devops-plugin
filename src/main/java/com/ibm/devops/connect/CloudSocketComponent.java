@@ -21,6 +21,7 @@ import com.ibm.devops.dra.DevOpsGlobalConfiguration;
 
 import com.ibm.cloud.urbancode.connect.client.ConnectSocket;
 import com.ibm.cloud.urbancode.connect.client.Listeners;
+import com.ibm.devops.connect.OnConnectListener;
 
 import com.ibm.devops.connect.CloudPublisher;
 
@@ -34,12 +35,14 @@ public class CloudSocketComponent {
     final private IWorkListener workListener;
     final private String cloudUrl;
     private ConnectSocket socket;
-    
+
+    private static boolean otherIntegrationExists = false;
+
     public CloudSocketComponent(IWorkListener workListener, String cloudUrl) {
         this.workListener = workListener;
         this.cloudUrl = cloudUrl;
     }
-    
+
     public boolean isRegistered() {
         return StringUtils.isNotBlank(getSyncToken());
     }
@@ -62,31 +65,48 @@ public class CloudSocketComponent {
         }
 
         CloudPublisher cloudPublisher = new CloudPublisher();
-        cloudPublisher.createIntegrationIfNecessary();
 
-        URI uri = new URI(cloudUrl);
-        log.info(logPrefix + "Starting cloud endpoint " + syncId);
-        socket = ConnectSocket.builder()
-            .uri(uri)
-            .id(syncId)
-            .token(syncToken)
-            .onConnect(Listeners.chain(Listeners.INFO_LOGGING, Listeners.EMIT_GET_WORK))
-            .onDisconnect(Listeners.INFO_LOGGING)
-            .onWorkAvailable(Listeners.chain(Listeners.DEBUG_LOGGING, Listeners.EMIT_GET_WORK))
-            .onWork(workListener)
-//            .onWork(Listeners.chain(Listeners.INFO_LOGGING, workListener))
-            .onError(Listeners.ERROR_LOGGING)
-            .build();
-        socket.on(Socket.EVENT_CONNECT_ERROR, Listeners.ERROR_LOGGING);
-        socket.on(Socket.EVENT_CONNECT_TIMEOUT, Listeners.ERROR_LOGGING);
-        socket.on(Socket.EVENT_RECONNECT_ERROR, Listeners.ERROR_LOGGING);
-        socket.on(Socket.EVENT_RECONNECT_FAILED, Listeners.ERROR_LOGGING);
-        socket.on(Socket.EVENT_RECONNECT_ATTEMPT, Listeners.INFO_LOGGING);
-        // do not listen for Socket.EVENT_RECONNECT, we will make 2 get work requests
-        
-        socket.connect();
+        boolean shouldConnect = true;
+        // Does integration exist
+        if(!cloudPublisher.doesIntegrationExist()) {
+            // Does another integration exist
+            if(cloudPublisher.doesOtherIntegrationExist()) {
+                log.warn(logPrefix + "These credentials have been used by another Jenkins Instance.  Please generate another Sync Id and provide those credentials here.");
+                shouldConnect = false;
+                otherIntegrationExists = true;
+            } else {
+                // Create Integration
+                cloudPublisher.createIntegration();
+            }
+        } else {
+            otherIntegrationExists = false;
+        }
+
+        if(shouldConnect) {
+            URI uri = new URI(cloudUrl);
+            log.info(logPrefix + "Starting cloud endpoint " + syncId);
+            socket = ConnectSocket.builder()
+                .uri(uri)
+                .id(syncId)
+                .token(syncToken)
+                .onConnect(Listeners.chain(Listeners.chain(Listeners.INFO_LOGGING, Listeners.EMIT_GET_WORK), OnConnectListener.BUILD_JOBS_LIST))
+                .onDisconnect(Listeners.INFO_LOGGING)
+                .onWorkAvailable(Listeners.chain(Listeners.DEBUG_LOGGING, Listeners.EMIT_GET_WORK))
+                .onWork(workListener)
+    //            .onWork(Listeners.chain(Listeners.INFO_LOGGING, workListener))
+                .onError(Listeners.ERROR_LOGGING)
+                .build();
+            socket.on(Socket.EVENT_CONNECT_ERROR, Listeners.ERROR_LOGGING);
+            socket.on(Socket.EVENT_CONNECT_TIMEOUT, Listeners.ERROR_LOGGING);
+            socket.on(Socket.EVENT_RECONNECT_ERROR, Listeners.ERROR_LOGGING);
+            socket.on(Socket.EVENT_RECONNECT_FAILED, Listeners.ERROR_LOGGING);
+            socket.on(Socket.EVENT_RECONNECT_ATTEMPT, Listeners.INFO_LOGGING);
+            // do not listen for Socket.EVENT_RECONNECT, we will make 2 get work requests
+
+            socket.connect();
+        }
     }
-    
+
     // this does get called, but you may not see logging in the console. it will appear in the file.
     public void disconnect() {
         if (socket != null) {
@@ -108,5 +128,13 @@ public class CloudSocketComponent {
             return false;
         }
         return socket.connected();
+    }
+
+    public String getCauseOfFailure() {
+        if (otherIntegrationExists) {
+            return "These credentials have been used by another Jenkins Instance.  Please generate another Sync Id and provide those credentials here.";
+        }
+
+        return null;
     }
 }

@@ -43,14 +43,10 @@ import com.ibm.devops.connect.CloudCause.JobStatus;
 
 import com.ibm.devops.dra.DevOpsGlobalConfiguration;
 
-import org.jenkinsci.plugins.uniqueid.IdStore;
-import hudson.plugins.git.util.BuildData;
-import hudson.plugins.git.util.Build;
-
 @Extension
 public class CloudBuildStepListener extends BuildStepListener {
 	public static final Logger log = LoggerFactory.getLogger(CloudBuildStepListener.class);
-	
+
     public void finished(AbstractBuild build, BuildStep bs, BuildListener listener, boolean canContinue) {
         // We listen to jobs that are started by IBM Cloud only
         if(this.shouldListen(build)) {

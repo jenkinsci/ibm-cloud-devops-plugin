@@ -15,6 +15,8 @@ import hudson.Extension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ibm.devops.connect.CloudItemListener;
+
 @Extension
 public class ConnectComputerListener extends ComputerListener {
 	public static final Logger log = LoggerFactory.getLogger(ConnectComputerListener.class);
@@ -39,11 +41,6 @@ public class ConnectComputerListener extends ComputerListener {
         try {
         	log.info(logPrefix + "Connecting to Cloud Services...");
             getCloudSocketInstance().connectToCloudServices();
-            if(getCloudSocketInstance().connected()) {
-                log.info(logPrefix + "Connected to Cloud Services!");
-            } else {
-                log.warn(logPrefix + "Failed to connected to Cloud Services");
-            }
         } catch (Exception e) {
             log.error(logPrefix + "Exception caught while connecting to Cloud Services: " + e);
         }

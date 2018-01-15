@@ -33,6 +33,7 @@ import java.io.ByteArrayInputStream;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.ArrayList;
 
 import jenkins.model.Jenkins;
 
@@ -50,25 +51,26 @@ import org.slf4j.LoggerFactory;
 public class JenkinsServer {
 	public static final Logger log = LoggerFactory.getLogger(JenkinsServer.class);
     private static String logPrefix= "[IBM Cloud DevOps] JenkinsServer#";
-    
+
     // creds
     private static String BLX_CREDS= "IBM_CLOUD_DEVOPS_CREDS_API";
     private static String BLX_CREDS_DESC= "IBM DevOps Bluemix credentials";
     // folder and job
     private static String FOLDER_SPEC= "<?xml version=\"1.0\" encoding=\"UTF-8\"?><com.cloudbees.hudson.plugins.folder.Folder plugin=\"cloudbees-folder\"><description>Folder created by the IBM Devops plugin</description></com.cloudbees.hudson.plugins.folder.Folder>";
     private static String jobSrc= "<?xml version='1.0' encoding='UTF-8'?>\r\n<flow-definition plugin=\"workflow-job@2.10\">\r\n    <description></description>\r\n    <keepDependencies>false</keepDependencies>\r\n    <properties>\r\n        <org.jenkinsci.plugins.workflow.job.properties.PipelineTriggersJobProperty>\r\n            <triggers>\r\n                <hudson.triggers.SCMTrigger>\r\n                    <spec>* * * * *</spec>\r\n                    <ignorePostCommitHooks>false</ignorePostCommitHooks>\r\n                </hudson.triggers.SCMTrigger>\r\n            </triggers>\r\n        </org.jenkinsci.plugins.workflow.job.properties.PipelineTriggersJobProperty>\r\n    </properties>\r\n    <definition class=\"org.jenkinsci.plugins.workflow.cps.CpsScmFlowDefinition\" plugin=\"workflow-cps@2.30\">\r\n        <scm class=\"hudson.plugins.git.GitSCM\" plugin=\"git@3.3.0\">\r\n            <configVersion>2</configVersion>\r\n            <userRemoteConfigs>\r\n                <hudson.plugins.git.UserRemoteConfig>\r\n                    <url>https://github.com/ejodet/discovery-nodejs</url>\r\n                </hudson.plugins.git.UserRemoteConfig>\r\n            </userRemoteConfigs>\r\n            <branches>\r\n                <hudson.plugins.git.BranchSpec>\r\n                    <name>*/mastertoto</name>\r\n                </hudson.plugins.git.BranchSpec>\r\n            </branches>\r\n            <doGenerateSubmoduleConfigurations>false</doGenerateSubmoduleConfigurations>\r\n            <submoduleCfg class=\"list\"/>\r\n            <extensions/>\r\n        </scm>\r\n        <scriptPath>Jenkinsfile</scriptPath>\r\n        <lightweight>true</lightweight>\r\n    </definition>\r\n    <triggers/>\r\n</flow-definition>";
-	
+
     public static Collection<String> getJobNames() {
     	log.debug(logPrefix + "getJobNames - get the list of job names");
     	Collection<String> allJobNames= Jenkins.getInstance().getJobNames();
     	log.debug(logPrefix + "getJobNames - retrieved " + allJobNames.size() + " JobNames");
     	for (Iterator iterator = allJobNames.iterator(); iterator.hasNext();) {
-    		String aJobName = (String) iterator.next(); 
+
+    		String aJobName = (String) iterator.next();
     		log.debug(logPrefix + "job: " + aJobName);
     	}
     	return Jenkins.getInstance().getJobNames();
     }
-    
+
     public static List<Item> getAllItems() {
     	log.debug(logPrefix + "getAllItems - get the list of all items");
     	List<Item> allItems= Jenkins.getInstance().getAllItems();
@@ -88,11 +90,11 @@ public class JenkinsServer {
     	log.debug(logPrefix + "getAllItems - Retrieved " + allItems.size() + " projects");
     	return allItems;
     }
-    
+
     public static Item getItemByName(String itemName) {
     	log.info(logPrefix + "Retrieving project " + itemName);
     	List<Item> allProjects= JenkinsServer.getAllItems();
-    	
+
     	for (Item anItem : allProjects) {
     		String aName = anItem.getFullName();
     		log.info(logPrefix + "project " + aName);
@@ -104,14 +106,14 @@ public class JenkinsServer {
     	log.info(logPrefix + "Project " + itemName + " not found!");
     	return null;
     }
-    
+
     public static void createJob(JSONObject newJob) {
     	log.debug(logPrefix + "createJob - Creating a new job.");
     	if(validCreationRequest(newJob)) {
     		// get current security settings
     		SecurityRealm securityRealm= Jenkins.getInstance().getSecurityRealm();
     		AuthorizationStrategy authorizationStrategy= Jenkins.getInstance().getAuthorizationStrategy();
-    		
+
         	// temporarily disable security as we are not allowed to create jobs as anonymous
         	disableSecurity();
     		try {
@@ -146,9 +148,9 @@ public class JenkinsServer {
             	Jenkins.getInstance().setSecurityRealm(securityRealm);
             	Jenkins.getInstance().setAuthorizationStrategy(authorizationStrategy);
             }
-        } 
+        }
     }
-    
+
     private static void createCredentials(JSONObject newJob) {
     	if(newJob.has("props")) {
             JSONObject props = newJob.getJSONObject("props");
@@ -168,7 +170,7 @@ public class JenkinsServer {
             }
         }
     }
-    
+
     private static boolean validCreationRequest(JSONObject newJob) {
     	log.debug(logPrefix + "validCreationRequest - Validating creation payload.");
     	boolean valid= false;
@@ -183,7 +185,7 @@ public class JenkinsServer {
         }
     	return valid;
     }
-    
+
     private static void createFolder(String folderName) {
     	log.debug(logPrefix + "createFolder - Creating folder " + folderName);
     	try {
@@ -195,7 +197,7 @@ public class JenkinsServer {
             // e.printStackTrace();
         }
     }
-    
+
     private static void createJobInFolder(Folder targetFolder, String jobName, String source) {
     	log.debug(logPrefix + "createItem - Creating job " + jobName);
     	try {
@@ -206,12 +208,12 @@ public class JenkinsServer {
             e.printStackTrace();
         }
     }
-    
+
     private static void disableSecurity() {
     	log.debug(logPrefix + "disableSecurity()");
     	Jenkins.getInstance().disableSecurity();
     }
-    
+
     private static Folder getFolder(String folderName) {
     	return (Folder) Jenkins.getInstance().getItem(folderName);
     }

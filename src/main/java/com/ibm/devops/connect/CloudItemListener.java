@@ -40,7 +40,6 @@ public class CloudItemListener extends ItemListener {
     public CloudItemListener(){
     	logPrefix= logPrefix + "CloudItemListener ";
     	log.info(logPrefix + "CloudItemListener started...");
-    	buildJobsList();
     }
 
     @Override
@@ -59,17 +58,20 @@ public class CloudItemListener extends ItemListener {
     }
 
     private void handleEvent(Item item, String phase) {
-        if( !(item instanceof Folder) ) {
-            JenkinsJob jenkinsJob= new JenkinsJob(item);
-            log.info(ToStringBuilder.reflectionToString(jenkinsJob.toJson()) + " was " + phase);
-            CloudPublisher cloudPublisher = new CloudPublisher();
-            cloudPublisher.uploadJobInfo(jenkinsJob.toJson());
+        CloudSocketComponent socket = new ConnectComputerListener().getCloudSocketInstance();
+        if(socket.connected()) {
+            if( !(item instanceof Folder) ) {
+                JenkinsJob jenkinsJob= new JenkinsJob(item);
+                log.info(ToStringBuilder.reflectionToString(jenkinsJob.toJson()) + " was " + phase);
+                CloudPublisher cloudPublisher = new CloudPublisher();
+                cloudPublisher.uploadJobInfo(jenkinsJob.toJson());
+            }
         }
 
     	// we'll handle the updates to the sync app here
     }
 
-    private List<JSONObject> buildJobsList() {
+    public List<JSONObject> buildJobsList() {
     	log.info(logPrefix + "Building the list of Jenkins jobs...");
     	List<Item> allProjects= JenkinsServer.getAllItems();
     	List<JSONObject> allJobs = new ArrayList<JSONObject>();

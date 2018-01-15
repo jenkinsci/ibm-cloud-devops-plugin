@@ -129,14 +129,8 @@ public class CloudPublisher  {
         try {
             CloseableHttpClient httpClient = HttpClients.createDefault();
 
-            String jenkinsId;
-
-            if (IdStore.getId(Jenkins.getInstance()) != null) {
-                jenkinsId = IdStore.getId(Jenkins.getInstance());
-            } else {
-                IdStore.makeId(Jenkins.getInstance());
-                jenkinsId = IdStore.getId(Jenkins.getInstance());
-            }
+            JenkinsIntegrationId jenkinsIntegrationId = new JenkinsIntegrationId();
+            String jenkinsId = jenkinsIntegrationId.getIntegrationId();
 
             HttpPost postMethod = new HttpPost(url);
             // postMethod = addProxyInformation(postMethod);
@@ -144,6 +138,7 @@ public class CloudPublisher  {
             postMethod.setHeader("sync_id", Jenkins.getInstance().getDescriptorByType(DevOpsGlobalConfiguration.class).getSyncId());
             postMethod.setHeader("instance_type", "JENKINS");
             postMethod.setHeader("instance_id", jenkinsId);
+            postMethod.setHeader("integration_id", jenkinsId);
             postMethod.setHeader("Content-Type", "application/json");
 
             StringEntity data = new StringEntity(payload);
@@ -180,20 +175,14 @@ public class CloudPublisher  {
         return false;
     }
 
-    public boolean createIntegrationIfNecessary() {
-    	String localLogPrefix = logPrefix + "createIntegrationIfNecessary ";
+    public boolean doesIntegrationExist() {
+    	String localLogPrefix = logPrefix + "doesIntegrationExist ";
         String resStr = "";
         try {
             CloseableHttpClient httpClient = HttpClients.createDefault();
 
-            String jenkinsId;
-
-            if (IdStore.getId(Jenkins.getInstance()) != null) {
-                jenkinsId = IdStore.getId(Jenkins.getInstance());
-            } else {
-                IdStore.makeId(Jenkins.getInstance());
-                jenkinsId = IdStore.getId(Jenkins.getInstance());
-            }
+            JenkinsIntegrationId jenkinsIntegrationId = new JenkinsIntegrationId();
+            String jenkinsId = jenkinsIntegrationId.getIntegrationId();
 
             String url = this.getSyncStoreUrl() + INTEGRATION_ENDPOINT_URL.replace("{integration_id}", jenkinsId);
 
@@ -223,10 +212,10 @@ public class CloudPublisher  {
                 return true;
 
             } else {
-                // if gets error status
+
                 log.info(localLogPrefix + "No Integration Retrieved");
-                log.info(localLogPrefix + "Attempting to create a new integration");
-                return this.createIntegration(jenkinsId);
+
+                return false;
             }
         } catch (JsonSyntaxException e) {
             log.error(localLogPrefix + "Invalid Json response, response: " + resStr);
@@ -247,9 +236,12 @@ public class CloudPublisher  {
         return false;
     }
 
-    private boolean createIntegration(String jenkinsId) {
+    public boolean createIntegration() {
     	String localLogPrefix= logPrefix + "createIntegration ";
         String resStr = "";
+
+        JenkinsIntegrationId jenkinsIntegrationId = new JenkinsIntegrationId();
+        String jenkinsId = jenkinsIntegrationId.getIntegrationId();
 
         try {
             CloseableHttpClient httpClient = HttpClients.createDefault();
@@ -264,6 +256,7 @@ public class CloudPublisher  {
             newIntegration.put("dateCreated", System.currentTimeMillis());
             newIntegration.put("docType", "integration");
             newIntegration.put("serverUrl", Jenkins.getInstance().getRootUrl());
+            newIntegration.put("type", "JENKINS");
 
             HttpPost postMethod = new HttpPost(url);
             // postMethod = addProxyInformation(postMethod);
@@ -311,12 +304,18 @@ public class CloudPublisher  {
     private boolean updateIntegrationServerUrl(JSONObject payload, String newServerUrl) {
     	String localLogPrefix= logPrefix + "updateIntegrationServerUrl ";
 
+        payload.put("serverUrl", newServerUrl);
+
+        return (updateIntegration(payload));
+    }
+
+    private boolean updateIntegration(JSONObject payload) {
+    	String localLogPrefix= logPrefix + "updateIntegrationServerUrl ";
+
         try {
             CloseableHttpClient httpClient = HttpClients.createDefault();
 
             String url = this.getSyncStoreUrl() + INTEGRATIONS_ENDPOINT_URL;
-
-            payload.put("serverUrl", newServerUrl);
 
             HttpPost putMethod = new HttpPost(url);
             // putMethod = addProxyInformation(putMethod);
@@ -358,4 +357,87 @@ public class CloudPublisher  {
         return false;
     }
 
+    public boolean doesOtherIntegrationExist() {
+        String localLogPrefix= logPrefix + "doesOtherIntegrationExist ";
+
+        String resStr = "";
+
+        try {
+            CloseableHttpClient httpClient = HttpClients.createDefault();
+
+            JenkinsIntegrationId jenkinsIntegrationIdGenerator = new JenkinsIntegrationId();
+            String jenkinsIntegrationId = jenkinsIntegrationIdGenerator.getIntegrationId();
+
+            String url = this.getSyncStoreUrl() + INTEGRATIONS_ENDPOINT_URL;
+
+            HttpGet getMethod = new HttpGet(url);
+            // postMethod = addProxyInformation(postMethod);
+            getMethod.setHeader("Content-Type", "application/json");
+
+            String authEncoding = DatatypeConverter.printBase64Binary((Jenkins.getInstance().getDescriptorByType(DevOpsGlobalConfiguration.class).getSyncId() + ":" + Jenkins.getInstance().getDescriptorByType(DevOpsGlobalConfiguration.class).getSyncToken()).getBytes("UTF-8"));
+            getMethod.setHeader("Authorization", "Basic " + authEncoding);
+
+            CloseableHttpResponse response = httpClient.execute(getMethod);
+
+            resStr = EntityUtils.toString(response.getEntity());
+            if (response.getStatusLine().toString().contains("200") || response.getStatusLine().toString().contains("201")) {
+
+                JSONArray jsonBody = JSONArray.fromObject(resStr);
+
+                boolean updatedOldIntegration = false;
+                boolean integrationFound = false;
+
+                for (int i = 0; i < jsonBody.size(); i++) {
+                    JSONObject integrationObj = jsonBody.getJSONObject(i);
+                    updatedOldIntegration = updateLegacyIntegrationIfNecessary(integrationObj);
+                    if(integrationObj.get("id").equals(jenkinsIntegrationId)) {
+                        integrationFound = true;
+                    }
+                }
+
+                if(!updatedOldIntegration && jsonBody.size() > 0 && !integrationFound) {
+                    return true;
+                }
+            }
+        } catch (JsonSyntaxException e) {
+            log.error(localLogPrefix + "Invalid Json response, response: " + resStr);
+        } catch (IllegalStateException e) {
+            // will be triggered when 403 Forbidden
+            try {
+                log.info(localLogPrefix + "Please check if you have the access to " + URLEncoder.encode(this.orgName, "UTF-8") + " org");
+            } catch (UnsupportedEncodingException e1) {
+                e1.printStackTrace();
+            }
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        } catch (ClientProtocolException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    /*
+    *   currently, the integration ID is the sync ID concatenated with an underscore and the Jenkins Server ID.  The original integration ID was
+    *   just the Jenkins Server ID.  If we find the Jenkins Server Id, we update that record with the proper Integration Id
+    */
+
+    private boolean updateLegacyIntegrationIfNecessary(JSONObject integrationObj) {
+        String jenkinsId;
+        if (IdStore.getId(Jenkins.getInstance()) != null) {
+            jenkinsId = IdStore.getId(Jenkins.getInstance());
+        } else {
+            IdStore.makeId(Jenkins.getInstance());
+            jenkinsId = IdStore.getId(Jenkins.getInstance());
+        }
+
+        if(integrationObj.get("id").equals(jenkinsId)) {
+            JenkinsIntegrationId jenkinsIntegrationId = new JenkinsIntegrationId();
+            integrationObj.put("id", jenkinsIntegrationId.getIntegrationId());
+            return updateIntegration(integrationObj);
+        }
+
+        return false;
+    }
 }

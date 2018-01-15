@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <metadata>
   <groupId>uc-cloud-connect-java</groupId>
-  <artifactId>cloud-connect-java/artifactId>
+  <artifactId>cloud-connect-java</artifactId>
   <versioning>
     <versions>
       <version>1.0.920563</version>
