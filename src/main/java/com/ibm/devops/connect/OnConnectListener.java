@@ -9,12 +9,8 @@ public class OnConnectListener {
     static final public Listener BUILD_JOBS_LIST = new Listener() {
 		@Override
 		public void call(ConnectSocket socket, String event, Object... args) {
-            System.out.println("/n/n/nHEY....................................\n\n");
-            // CloudItemListener cil = new CloudItemListener();
-            // cil.buildJobsList();
-
-            BuildJobsList buildJobList = new BuildJobsList();
-            buildJobList.runAsJenkinsUser(null);
+                  BuildJobsList buildJobList = new BuildJobsList();
+                  buildJobList.runAsJenkinsUser(null);
 		}
 	};
 }
