@@ -141,7 +141,7 @@ public class JenkinsServer {
         			}
     			}
     		} catch (Exception e) {
-    			log.error(logPrefix + "An unexepected error occurred while creating job.");
+    			log.error(logPrefix + "An unexpected error occurred while creating job.");
                 e.printStackTrace();
             } finally {
             	// be sure to re-enable security

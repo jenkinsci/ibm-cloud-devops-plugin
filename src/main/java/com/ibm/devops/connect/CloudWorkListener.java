@@ -248,7 +248,7 @@ public class CloudWorkListener implements IWorkListener {
     }
 
     private String escapeItemName(String itemName) {
-        String result = item.replace("\'", "&apos;");
-        return result
+        String result = itemName.replace("\'", "&apos;");
+        return result;
     }
 }
