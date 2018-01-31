@@ -99,34 +99,44 @@ public class JenkinsJob {
 	private JSONArray getJobParams() {
 		JSONArray result = new JSONArray();
 
-		if(this.item instanceof AbstractProject) {
+		if (this.item instanceof WorkflowJob) {
+			ParametersDefinitionProperty paramDefProperty = ((WorkflowJob)this.item).getProperty(ParametersDefinitionProperty.class);
+			if (paramDefProperty != null) {
+				List<ParameterDefinition> paramDefs = paramDefProperty.getParameterDefinitions();
+				for (ParameterDefinition paramDef : paramDefs) {
+					result.add(convertJobParameter(paramDef));
+				}
+			}
+		} else if (this.item instanceof AbstractProject) {
 			List<Action> actions = ((AbstractProject)this.item).getActions();
 
 			for(Action action : actions) {
 				if (action instanceof ParametersDefinitionProperty) {
 					List<ParameterDefinition> paraDefs = ((ParametersDefinitionProperty)action).getParameterDefinitions();
 					for (ParameterDefinition paramDef : paraDefs) {
-						JSONObject paramDefObj = new JSONObject();
-						paramDefObj.put("name", paramDef.getName());
-						paramDefObj.put("type", paramDef.getType());
-						paramDefObj.put("description", paramDef.getDescription());
-						ParameterValue pValue = paramDef.getDefaultParameterValue();
-						if (pValue != null) {
-							paramDefObj.put("defaultValue", pValue.getValue());
-						}
-
-						if(paramDef instanceof ChoiceParameterDefinition) {
-							List<String> options = ((ChoiceParameterDefinition)paramDef).getChoices();
-
-							paramDefObj.put("options", options);
-						}
-
-						result.add(paramDefObj);
+						result.add(convertJobParameter(paramDef));
 					}
-
 					break;
 				}
 			}
+		}
+
+		return result;
+	}
+
+	private JSONObject convertJobParameter(ParameterDefinition paramDef) {
+		JSONObject result = new JSONObject();
+		result.put("name", paramDef.getName());
+		result.put("type", paramDef.getType());
+		result.put("description", paramDef.getDescription());
+		ParameterValue pValue = paramDef.getDefaultParameterValue();
+		if (pValue != null) {
+			result.put("defaultValue", pValue.getValue());
+		}
+
+		if(paramDef instanceof ChoiceParameterDefinition) {
+			List<String> options = ((ChoiceParameterDefinition)paramDef).getChoices();
+			result.put("options", options);
 		}
 
 		return result;
