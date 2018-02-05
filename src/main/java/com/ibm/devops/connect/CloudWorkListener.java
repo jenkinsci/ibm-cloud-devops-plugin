@@ -138,7 +138,7 @@ public class CloudWorkListener implements IWorkListener {
                     returnProps = incomingJob.getJSONObject("returnProps");
                 }
 
-                CloudCause cloudCause = new CloudCause(socket, incomingJob.get("id").toString(), returnProps);
+                CloudCause cloudCause = new CloudCause(incomingJob.get("id").toString(), returnProps);
                 Queue.Item queuedItem = null;
                 String errorMessage = null;
 

@@ -2,7 +2,6 @@ package com.ibm.devops.connect;
 
 import hudson.model.Cause;
 import hudson.model.Node;
-import com.ibm.cloud.urbancode.connect.client.ConnectSocket;
 
 import java.util.List;
 import java.util.Set;
@@ -24,13 +23,20 @@ public class CloudCause extends Cause {
     private List<JSONObject> steps = new ArrayList<JSONObject>();
 
     private SourceData sourceData;
+    private DRAData draData;
+
+    private Boolean createdFromCR = false;
 
     // private ConnectSocket socket;
 
-    public CloudCause(ConnectSocket socket, String workId, JSONObject returnProps) {
+    public CloudCause(String workId, JSONObject returnProps) {
         this.workId = workId;
         this.returnProps = returnProps;
-        // this.socket = socket;
+        this.createdFromCR = true;
+    }
+
+    public CloudCause() {
+        this.createdFromCR = false;
     }
 
     @Override
@@ -55,11 +61,27 @@ public class CloudCause extends Cause {
         return this.sourceData;
     }
 
+    public void setDRAData(DRAData draData) {
+        this.draData = draData;
+    }
+
+    public DRAData getDRAData() {
+        return this.draData;
+    }
+
     public JSONObject getSourceDataJson() {
         if(this.sourceData == null) {
             return new JSONObject();
         } else {
             return sourceData.toJson();
+        }
+    }
+
+    public JSONObject getDRADataJson() {
+        if(this.draData == null) {
+            return new JSONObject();
+        } else {
+            return draData.toJson();
         }
     }
 
@@ -73,6 +95,10 @@ public class CloudCause extends Cause {
 
     public void addSourceData(String branch, String revision, String scmName, Set<String> remoteUrls) {
 
+    }
+
+    public Boolean isCreatedByCR() {
+        return this.createdFromCR;
     }
 
     public JSONObject getReturnProps() {

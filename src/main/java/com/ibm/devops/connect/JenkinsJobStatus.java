@@ -36,6 +36,9 @@ import org.jenkinsci.plugins.uniqueid.IdStore;
 import hudson.plugins.git.util.BuildData;
 import hudson.plugins.git.util.Build;
 
+import com.ibm.devops.dra.EvaluateGate;
+import com.ibm.devops.dra.GatePublisherAction;
+
 import java.util.Map;
 import java.util.List;
 
@@ -63,6 +66,7 @@ public class JenkinsJobStatus {
         JSONObject result = new JSONObject();
 
         evaluateSourceData(build, cloudCause);
+        evaluateDRAData();
 
         if(!(buildStep instanceof hudson.model.ParametersDefinitionProperty)) {
             if (newStep) {
@@ -78,7 +82,9 @@ public class JenkinsJobStatus {
                     message = "The build step failed and the job can not continue.";
                 }
 
-                cloudCause.updateLastStep(((Describable)buildStep).getDescriptor().getDisplayName(), newStatus, message, isFatal);
+                if (cloudCause.isCreatedByCR()) {
+                    cloudCause.updateLastStep(((Describable)buildStep).getDescriptor().getDisplayName(), newStatus, message, isFatal);
+                }
             }
         }
 
@@ -109,7 +115,12 @@ public class JenkinsJobStatus {
 
         result.put("jobExternalId", getJobUniqueIdFromBuild(build));
 
+        AbstractProject project = (AbstractProject)build.getProject();
+        String jobName = project.getName();
+        result.put("jobName", jobName);
+
         result.put("sourceData", cloudCause.getSourceDataJson());
+        result.put("draData", cloudCause.getDRADataJson());
 
         return result;
     }
@@ -172,4 +183,62 @@ public class JenkinsJobStatus {
         }
     }
 
+    private void evaluateDRAData() {
+        DRAData data = cloudCause.getDRAData();
+
+        List<Action> actions = build.getActions();
+        if(data == null) {
+            for(Action action : actions) {
+                if (action instanceof CrDraAction) {
+                    CrDraAction cda = (CrDraAction)action;
+                    data = cda.getDRAData();
+                    cloudCause.setDRAData(data);
+                }
+            }
+        }
+
+        if(data == null) {
+            data = new DRAData();
+        }
+
+
+        if (this.buildStep instanceof EvaluateGate) {
+
+            EvaluateGate egs = (EvaluateGate)buildStep;
+
+            String buildNumber = egs.getBuildNumber();
+            String environment = egs.getEnvName();
+            String policy = egs.getPolicyName();
+            String applicationName = egs.getApplicationName();
+            String orgName = egs.getOrgName();
+            String toolchainName = egs.getToolchainName();
+
+            data.setApplicationName(applicationName);
+            data.setOrgName(orgName);
+            data.setToolchainName(toolchainName);
+            data.setEnvironment(environment);
+            data.setBuildNumber(buildNumber);
+            data.setPolicy(policy);
+
+            for(Action action : actions) {
+                if (action instanceof GatePublisherAction) {
+                    GatePublisherAction gpa = (GatePublisherAction)action;
+
+                    String gateText = gpa.getText();
+                    String riskDashboardLink = gpa.getRiskDashboardLink();
+                    String decision = gpa.getDecision();
+
+                    data.setGateText(gateText);
+                    data.setDecision(decision);
+                    data.setRiskDahboardLink(riskDashboardLink);
+
+                }
+            }
+
+            CrDraAction cda = new CrDraAction(data);
+            build.addAction(cda);
+
+            cloudCause.setDRAData(data);
+        }
+    }
 }

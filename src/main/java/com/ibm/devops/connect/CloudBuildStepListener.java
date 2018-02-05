@@ -48,13 +48,15 @@ public class CloudBuildStepListener extends BuildStepListener {
 	public static final Logger log = LoggerFactory.getLogger(CloudBuildStepListener.class);
 
     public void finished(AbstractBuild build, BuildStep bs, BuildListener listener, boolean canContinue) {
-        // We listen to jobs that are started by IBM Cloud only
-        if(this.shouldListen(build)) {
-            JenkinsJobStatus status = new JenkinsJobStatus(build, getCloudCause(build), bs, false, !canContinue);
-            JSONObject statusUpdate = status.generate();
-            CloudPublisher cloudPublisher = new CloudPublisher();
-            cloudPublisher.uploadJobStatus(statusUpdate);
+
+        CloudCause cloudCause = getCloudCause(build);
+        if (cloudCause == null) {
+            cloudCause = new CloudCause();
         }
+        JenkinsJobStatus status = new JenkinsJobStatus(build, cloudCause, bs, false, !canContinue);
+        JSONObject statusUpdate = status.generate();
+        CloudPublisher cloudPublisher = new CloudPublisher();
+        cloudPublisher.uploadJobStatus(statusUpdate);
     }
 
     public void started(AbstractBuild build, BuildStep bs, BuildListener listener) {
