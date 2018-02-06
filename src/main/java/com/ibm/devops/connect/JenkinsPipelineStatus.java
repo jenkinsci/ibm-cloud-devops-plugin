@@ -41,6 +41,7 @@ import com.ibm.devops.dra.GatePublisherAction;
 
 import org.jenkinsci.plugins.workflow.flow.FlowExecution;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
+import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jenkinsci.plugins.workflow.graph.FlowNode;
 
 import java.util.Map;
@@ -110,12 +111,9 @@ public class JenkinsPipelineStatus {
         result.put("isPipeline", true);
         result.put("isPaused", isPaused);
 
-        //TODO
-        //result.put("jobExternalId", getJobUniqueIdFromBuild(build));
-
-        // AbstractProject project = (AbstractProject)build.getProject();
-        // String jobName = project.getName();
-        // result.put("jobName", jobName);
+        WorkflowJob workflowJob = (WorkflowJob)(workflowRun.getParent());
+        result.put("jobName", workflowJob.getName());
+        result.put("jobExternalId", getJobUniqueIdFromBuild(workflowJob));
 
         result.put("sourceData", cloudCause.getSourceDataJson());
         result.put("draData", cloudCause.getDRADataJson());
@@ -128,9 +126,17 @@ public class JenkinsPipelineStatus {
         return null;
     }
 
-    private String getJobUniqueIdFromBuild(AbstractBuild build) {
+    private String getJobUniqueIdFromBuild(WorkflowJob job) {
+        String jobId;
 
-        return null;
+        if (IdStore.getId(job) != null) {
+            jobId = IdStore.getId(job);
+        } else {
+            IdStore.makeId(job);
+            jobId = IdStore.getId(job);
+        }
+
+        return jobId;
     }
 
     private void evaluateSourceData(WorkflowRun workflowRun, CloudCause cause) {
