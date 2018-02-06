@@ -43,30 +43,59 @@ import com.ibm.devops.connect.CloudCause.JobStatus;
 
 import com.ibm.devops.dra.DevOpsGlobalConfiguration;
 
-import org.jenkinsci.plugins.workflow.flow.FlowExecutionListener;
+import org.jenkinsci.plugins.workflow.flow.GraphListener;
 import org.jenkinsci.plugins.workflow.flow.FlowExecution;
 import org.jenkinsci.plugins.workflow.steps.StepExecution;
 import org.jenkinsci.plugins.workflow.graph.FlowNode;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
+import org.jenkinsci.plugins.workflow.support.actions.PauseAction;
 
 import java.io.IOException;
 
 @Extension
-public class CloudFlowExecutionListener extends FlowExecutionListener {
-	public static final Logger log = LoggerFactory.getLogger(CloudFlowExecutionListener.class);
+public class CloudGraphListener implements GraphListener {
+	public static final Logger log = LoggerFactory.getLogger(CloudGraphListener.class);
 
-    @Override
-    public void onRunning(FlowExecution execution) {
+    public void onNewHead(FlowNode node) {
+        FlowExecution execution = node.getExecution();
 
+        WorkflowRun workflowRun = null;
+
+        try {
+            if (execution.getOwner().getExecutable() instanceof WorkflowRun) {
+                workflowRun = (WorkflowRun)(execution.getOwner().getExecutable());
+            }
+        } catch (IOException e) {
+            log.error("HIT THE IOEXCEPTION: " + e);
+            return;
+        }
+
+        CloudCause cloudCause = getCloudCause(workflowRun);
+        if (cloudCause == null) {
+            cloudCause = new CloudCause();
+        }
+
+        boolean isStartNode = node.getClass().getName().equals("org.jenkinsci.plugins.workflow.cps.nodes.StepStartNode");
+        boolean isEndNode = node.getClass().getName().equals("org.jenkinsci.plugins.workflow.cps.nodes.StepStartNode");
+        boolean isPauseNode = PauseAction.isPaused(node);
+
+        if(isStartNode || isEndNode || isPauseNode) {
+            JenkinsPipelineStatus status = new JenkinsPipelineStatus(workflowRun, cloudCause, node, isStartNode, isPauseNode);
+            JSONObject statusUpdate = status.generate();
+            CloudPublisher cloudPublisher = new CloudPublisher();
+            cloudPublisher.uploadJobStatus(statusUpdate);
+        }
     }
 
-    @Override
-    public void onResumed(FlowExecution execution) {
+    private CloudCause getCloudCause(WorkflowRun workflowRun) {
+        List<Cause> causes = workflowRun.getCauses();
 
-    }
+        for(Cause cause : causes) {
+            if (cause instanceof CloudCause ) {
+                return (CloudCause)cause;
+            }
+        }
 
-    @Override
-    public void onCompleted(FlowExecution execution) {
-
+        return null;
     }
 }

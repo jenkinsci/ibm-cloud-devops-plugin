@@ -87,7 +87,9 @@ public class CloudCause extends Cause {
 
     public void updateLastStep(String name, String status, String message, boolean isFatal) {
         JSONObject obj = steps.get(steps.size() - 1);
-        obj.put("name", name);
+        if(name != null) {
+            obj.put("name", name);
+        }
         obj.put("status", status);
         obj.put("message", message);
         obj.put("isFatal", isFatal);

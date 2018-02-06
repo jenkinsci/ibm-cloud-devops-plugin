@@ -17,22 +17,59 @@ package com.ibm.devops.connect;
 import hudson.Extension;
 import hudson.model.listeners.RunListener;
 import hudson.model.TaskListener;
+import hudson.model.Cause;
 
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import net.sf.json.JSONObject;
+import net.sf.json.JSONArray;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.HashSet;
+
+import com.ibm.devops.connect.CloudCause.JobStatus;
 
 @Extension
 public class CloudRunListener extends RunListener<WorkflowRun> {
     public static final Logger log = LoggerFactory.getLogger(CloudRunListener.class);
 
     @Override
-    public void onStarted(WorkflowRun workflow, TaskListener listener) {
+    public void onStarted(WorkflowRun workflowRun, TaskListener listener) {
         // http://javadoc.jenkins.io/plugin/workflow-job/org/jenkinsci/plugins/workflow/job/WorkflowRun.html
+        CloudCause cloudCause = getCloudCause(workflowRun);
+        if (cloudCause == null) {
+            cloudCause = new CloudCause();
+        }
+        JenkinsPipelineStatus status = new JenkinsPipelineStatus(workflowRun, cloudCause, null, true, false);
+        JSONObject statusUpdate = status.generate();
+        CloudPublisher cloudPublisher = new CloudPublisher();
+        cloudPublisher.uploadJobStatus(statusUpdate);
     }
 
     @Override
-    public void onCompleted(WorkflowRun workflow, TaskListener listener) {
-        // TODO - should match 
+    public void onCompleted(WorkflowRun workflowRun, TaskListener listener) {
+        CloudCause cloudCause = getCloudCause(workflowRun);
+        if (cloudCause == null) {
+            cloudCause = new CloudCause();
+        }
+        JenkinsPipelineStatus status = new JenkinsPipelineStatus(workflowRun, cloudCause, null, false, false);
+        JSONObject statusUpdate = status.generate();
+        CloudPublisher cloudPublisher = new CloudPublisher();
+        cloudPublisher.uploadJobStatus(statusUpdate);
+    }
+
+    private CloudCause getCloudCause(WorkflowRun workflowRun) {
+        List<Cause> causes = workflowRun.getCauses();
+
+        for(Cause cause : causes) {
+            if (cause instanceof CloudCause ) {
+                return (CloudCause)cause;
+            }
+        }
+
+        return null;
     }
 }

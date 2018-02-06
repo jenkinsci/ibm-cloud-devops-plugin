@@ -153,9 +153,9 @@ public class CloudWorkListener implements IWorkListener {
                 } else if (item instanceof WorkflowJob) {
                     WorkflowJob workflowJob = (WorkflowJob)item;
 
-                    workflowJob.scheduleBuild2(0, new ParametersAction(parametersList), new CauseAction(cloudCause));
+                    QueueTaskFuture queuedTask = workflowJob.scheduleBuild2(0, new ParametersAction(parametersList), new CauseAction(cloudCause));
 
-                    if (queuedItem == null) {
+                    if (queuedTask == null) {
                         errorMessage = "Could not start pipeline build.";
                     }
                 } else if (item == null) {
