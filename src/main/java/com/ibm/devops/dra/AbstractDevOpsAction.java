@@ -75,33 +75,42 @@ public abstract class AbstractDevOpsAction extends Recorder {
     private final static String ORG= "&&organization_guid:";
     private final static String SPACE= "&&space_guid:";
     
-    private static Map<String, String> TARGET_API_MAP = ImmutableMap.of(
-            "production", "https://api.ng.bluemix.net",
-            "dev", "https://api.stage1.ng.bluemix.net",
-            "new", "https://api.stage1.ng.bluemix.net",
-            "stage1", "https://api.stage1.ng.bluemix.net"
-    );
-
-    private static Map<String, String> ORGANIZATIONS_URL_MAP = ImmutableMap.of(
-            "production", "https://api.ng.bluemix.net/v2/organizations?q=name:",
-            "dev", "https://api.stage1.ng.bluemix.net/v2/organizations?q=name:",
-            "new", "https://api.stage1.ng.bluemix.net/v2/organizations?q=name:",
-            "stage1", "https://api.stage1.ng.bluemix.net/v2/organizations?q=name:"
-    );
+    // ImmutableMap accepts at most 5 items - https://www.lewuathe.com/guava-immutablemap-limitation.html
+    private static Map<String, String> TARGET_API_MAP = ImmutableMap.<String, String>builder()
+    	    .put("production", "https://api.ng.bluemix.net")
+    	    .put("dev", "https://api.stage1.ng.bluemix.net")
+    	    .put("new", "https://api.stage1.ng.bluemix.net")
+    	    .put("stage1", "https://api.stage1.ng.bluemix.net")
+    	    .put("eu-de", "https://api.eu-de.bluemix.net")
+    	    .put("eu-gb", "https://api.eu-gb.bluemix.net")
+    	    .build();
     
-    private static Map<String, String> SPACES_URL_MAP = ImmutableMap.of(
-            "production", "https://api.ng.bluemix.net/v2/spaces?q=name:",
-            "dev", "https://api.stage1.ng.bluemix.net/v2/spaces?q=name:",
-            "new", "https://api.stage1.ng.bluemix.net/v2/spaces?q=name:",
-            "stage1", "https://api.stage1.ng.bluemix.net/v2/spaces?q=name:"
-    );
+    private static Map<String, String> ORGANIZATIONS_URL_MAP = ImmutableMap.<String, String>builder()
+    	    .put("production", "https://api.ng.bluemix.net/v2/organizations?q=name:")
+    	    .put("dev", "https://api.stage1.ng.bluemix.net/v2/organizations?q=name:")
+    	    .put("new", "https://api.stage1.ng.bluemix.net/v2/organizations?q=name:")
+    	    .put("stage1", "https://api.stage1.ng.bluemix.net/v2/organizations?q=name:")
+    	    .put("eu-de", "https://api.eu-de.bluemix.net/v2/organizations?q=name:")
+    	    .put("eu-gb", "https://api.eu-gb.bluemix.net/v2/organizations?q=name:")
+    	    .build();
     
-    private static Map<String, String> APPS_URL_MAP = ImmutableMap.of(
-            "production", "https://api.ng.bluemix.net/v2/apps?q=name:",
-            "dev", "https://api.stage1.ng.bluemix.net/v2/apps?q=name:",
-            "new", "https://api.stage1.ng.bluemix.net/v2/apps?q=name:",
-            "stage1", "https://api.stage1.ng.bluemix.net/v2/apps?q=name:"
-    );
+    private static Map<String, String> SPACES_URL_MAP = ImmutableMap.<String, String>builder()
+    	    .put("production", "https://api.ng.bluemix.net/v2/spaces?q=name:")
+    	    .put("dev", "https://api.stage1.ng.bluemix.net/v2/spaces?q=name:")
+    	    .put("new", "https://api.stage1.ng.bluemix.net/v2/spaces?q=name:")
+    	    .put("stage1", "https://api.stage1.ng.bluemix.net/v2/spaces?q=name:")
+    	    .put("eu-de", "https://api.eu-de.bluemix.net/v2/spaces?q=name:")
+    	    .put("eu-gb", "https://api.eu-gb.bluemix.net/v2/spaces?q=name:")
+    	    .build();
+    
+    private static Map<String, String> APPS_URL_MAP = ImmutableMap.<String, String>builder()
+    	    .put("production", "https://api.ng.bluemix.net/v2/apps?q=name:")
+    	    .put("dev", "https://api.stage1.ng.bluemix.net/v2/apps?q=name:")
+    	    .put("new", "https://api.stage1.ng.bluemix.net/v2/apps?q=name:")
+    	    .put("stage1", "https://api.stage1.ng.bluemix.net/v2/apps?q=name:")
+    	    .put("eu-de", "https://api.eu-de.bluemix.net/v2/apps?q=name:")
+    	    .put("eu-gb", "https://api.eu-gb.bluemix.net/v2/apps?q=name:")
+    	    .build();
 
     private static Map<String, String> TOOLCHAINS_URL_MAP = ImmutableMap.of(
             "production", "https://otc-api.ng.bluemix.net/api/v1/toolchains?organization_guid=",

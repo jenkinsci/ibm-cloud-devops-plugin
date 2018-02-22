@@ -13,7 +13,7 @@
 -->
 
 <?jelly escape-by-default='true'?>
-<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form" xmlns:c="/lib/credentials">
     <!--
       This Jelly script is used to produce the global configuration option.
 
@@ -36,5 +36,27 @@
                 <option value="true">True</option>
             </select>
         </f:entry>
+    </f:section>
+    <f:section title="IBM Cloud Connect Configuration">
+        <f:entry title="Sync ID" field="syncId">
+            <f:textbox />
+        </f:entry>
+        <f:entry title="Sync Token" field="syncToken">
+            <f:password />
+        </f:entry>
+        <f:entry title="">
+            <div style="text-align: right">
+            <f:validateButton
+                title="${%Test Connection}" progress="${%Testing...}"
+                method="testConnection" with="url,token"/>
+            </div>
+        </f:entry>
+
+
+
+        <f:entry title="Jenkins credentials" field="credentialsId">
+            <c:select/>
+        </f:entry>
+
     </f:section>
 </j:jelly>

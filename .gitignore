@@ -40,6 +40,9 @@ buildNumber.properties
 
 ## Plugin-specific files:
 
+# VS Code
+.vscode
+
 # IntelliJ
 /out/
 

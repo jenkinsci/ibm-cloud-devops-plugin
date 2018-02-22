@@ -15,6 +15,7 @@
 package com.ibm.devops.dra;
 
 
+import com.google.common.collect.ImmutableMap;
 import hudson.EnvVars;
 import java.io.PrintStream;
 import java.util.HashMap;
@@ -25,6 +26,13 @@ import java.util.Map;
  */
 
 public class Util {
+	
+	private static Map<String, String> TARGET_API_MAP = ImmutableMap.of(
+            "devops-api.ng.bluemix.net", "production",
+            "devops-api.stage1.ng.bluemix.net", "stage1",
+            "devops-api.eu-de.bluemix.net", "eu-de",
+            "devops-api.eu-gb.bluemix.net", "eu-gb"
+    );
     /**
      * check if the str is null or empty
      * @param str
@@ -57,6 +65,20 @@ public class Util {
             }
         }
         return true;
+    }
+    
+    public static String getTargetEnv(String webHookUrl, PrintStream printStream) {
+        if (!isNullOrEmpty(webHookUrl)) {
+        	String baseUrl = webHookUrl.split("@")[1];
+        	String environment = baseUrl.split("/")[0];
+            if (TARGET_API_MAP.keySet().contains(environment)) {
+                return TARGET_API_MAP.get(environment);
+            } else {
+            	printStream.println("[IBM Cloud DevOps] WARNING - environment not found: " + environment);
+            }
+        }
+        // default to production
+        return TARGET_API_MAP.get("production");
     }
     
     public static boolean validateEnvVariables(EnvVars envVars, PrintStream printStream) {

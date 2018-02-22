@@ -61,6 +61,7 @@
       <id>maven.jenkins-ci.org</id>
       <url>https://repo.jenkins-ci.org/snapshots/</url>
     </snapshotRepository>
+
   </distributionManagement>
 
   <licenses>
@@ -106,16 +107,16 @@
 
   <repositories>
     <repository>
+      <id>Local repository</id>
+      <url>file://${basedir}/lib</url>
+    </repository>
+    <repository>
       <id>repo.jenkins-ci.org</id>
       <url>https://repo.jenkins-ci.org/public/</url>
     </repository>
     <!-- A CF Java client shaded library is pre-installed in a local repository
          to allow building the project in a single 'mvn clean install'.
          See README.md for more details. -->
-    <repository>
-      <id>Local repository</id>
-      <url>file://${basedir}/lib</url>
-    </repository>
     <repository>
       <id>spring-snapshots</id>
       <name>Spring Snapshots</name>
@@ -143,6 +144,11 @@
       <groupId>org.apache.httpcomponents</groupId>
       <artifactId>httpcore</artifactId>
       <version>4.4.5</version>
+    </dependency>
+    <dependency>
+      <groupId>org.jenkins-ci.plugins</groupId>
+      <artifactId>unique-id</artifactId>
+      <version>2.1.3</version>
     </dependency>
     <dependency>
       <groupId>org.apache.httpcomponents</groupId>
@@ -188,6 +194,54 @@
       <artifactId>powermock-api-mockito2</artifactId>
       <version>${powermock.version}</version>
       <scope>test</scope>
+    </dependency>
+    <dependency>
+        <groupId>uc-cloud-connect-java</groupId>
+        <artifactId>cloud-connect-java</artifactId>
+        <version>1.0.920563</version>
+        <scope>compile</scope>
+    </dependency>
+    <dependency>
+        <groupId>org.jenkins-ci.plugins</groupId>
+        <artifactId>cloudbees-folder</artifactId>
+        <version>6.0.4</version>
+    </dependency>
+    <dependency>
+        <groupId>org.apache.commons</groupId>
+        <artifactId>commons-lang3</artifactId>
+        <version>3.1</version>
+    </dependency>
+    <dependency>
+        <groupId>io.socket</groupId>
+        <artifactId>socket.io-client</artifactId>
+        <version>0.8.3</version>
+        <scope>compile</scope>
+    </dependency>
+    <dependency>
+        <groupId>org.jenkins-ci.plugins.workflow</groupId>
+        <artifactId>workflow-job</artifactId>
+        <version>2.11.2</version>
+    </dependency>
+    <dependency>
+        <groupId>org.eclipse.hudson.plugins</groupId>
+        <artifactId>git</artifactId>
+        <version>3.0.1</version>
+    </dependency>
+    <dependency>
+        <groupId>org.jenkins-ci.plugins.workflow</groupId>
+        <artifactId>workflow-api</artifactId>
+        <version>2.22</version>
+    </dependency>
+    <dependency>
+      <groupId>org.jenkins-ci.plugins</groupId>
+      <artifactId>cloudbees-folder</artifactId>
+      <version>6.0.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.acegisecurity</groupId>
+      <artifactId>acegi-security</artifactId>
+      <version>1.0.7</version>
+      <scope>provided</scope>
     </dependency>
   </dependencies>
 </project>
