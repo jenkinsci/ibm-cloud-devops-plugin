@@ -76,7 +76,7 @@ public class CloudGraphListener implements GraphListener {
         }
 
         boolean isStartNode = node.getClass().getName().equals("org.jenkinsci.plugins.workflow.cps.nodes.StepStartNode");
-        boolean isEndNode = node.getClass().getName().equals("org.jenkinsci.plugins.workflow.cps.nodes.StepStartNode");
+        boolean isEndNode = node.getClass().getName().equals("org.jenkinsci.plugins.workflow.cps.nodes.StepEndNode");
         boolean isPauseNode = PauseAction.isPaused(node);
 
         if(isStartNode || isEndNode || isPauseNode) {
