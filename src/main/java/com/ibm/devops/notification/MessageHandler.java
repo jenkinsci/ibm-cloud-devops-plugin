@@ -147,6 +147,9 @@ public final class MessageHandler {
                 	postMethod.addHeader("x-create-connection", "true");
                 	printStream.println("[IBM Cloud DevOps] Sending Deployable Mapping message to webhook:");
                 	printStream.println(message);
+                } else {
+                	printStream.println("[IBM Cloud DevOps] Sending DLMS message to webhook:");
+                	printStream.println(message);
                 }
                 
                 CloseableHttpResponse response = httpClient.execute(postMethod);
@@ -170,6 +173,8 @@ public final class MessageHandler {
     	try {
     		JSONObject deployableMappingMessage;
         	// API
+    		String webHookUrl= Util.getWebhookUrl(envVars);
+    		environment= Util.getTargetEnv(webHookUrl, printStream);
         	String apiUrl= AbstractDevOpsAction.chooseTargetAPI(environment);
         	
     		// get bluemix token first
