@@ -91,7 +91,11 @@ public class JenkinsPipelineStatus extends AbstractJenkinsStatus {
         } else if(!newStep && node != null) {
 
             if(node.getError() == null) {
-                cloudCause.updateLastStep(null, JobStatus.success.toString(), "Stage is successful", false);
+                if(cloudCause.isCreatedByCR()) {
+                    cloudCause.updateLastStep(null, JobStatus.success.toString(), "Stage is successful", false);
+                } else {
+                    cloudCause.addStep(null, JobStatus.success.toString(), "Stage is successful", false);
+                }
             } else {
                 cloudCause.updateLastStep(null, JobStatus.failure.toString(), node.getError().getDisplayName(), false);
             }
