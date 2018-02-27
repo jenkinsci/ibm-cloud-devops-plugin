@@ -14,10 +14,10 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.ibm.devops</groupId>
-  <artifactId>ibm-cloud-devops</artifactId>
-  <version>1.1.7-SNAPSHOT</version>
+  <artifactId>ibm-continuous-release</artifactId>
+  <version>1.1.0</version>
   <packaging>hpi</packaging>
-  <name>IBM Cloud DevOps</name>
+  <name>IBM Continuous Release</name>
   <description>This plugin can be used to integrate your Jenkins pipelines and jobs with IBM DevOps Insights offering.  The IBM DevOps Insights offering tracks your deployment risk based on the data that you publish to it.  It provides Gates so that you can stop builds from getting deployed if the Gate policy is not met.  The offering also provides analysis of your Git repo.  For example, it can provide trends for large commits, error prone files, and team dynamics.  Very soon, the offering will provide more trends, e.g., Deploy Frequency, Build Frequency, Unit Tests and Code Coverage and Function Verification Tests for builds that have deployed to production or other environments.</description>
   <url>https://wiki.jenkins-ci.org/display/JENKINS/IBM+Cloud+DevOps+Plugin</url>
 
@@ -73,29 +73,9 @@
 
   <developers>
     <developer>
-      <id>xunrongl</id>
-      <name>Xunrong Li</name>
-      <email>xunrongli@us.ibm.com</email>
-    </developer>
-    <developer>
-      <id>aggarwav</id>
-      <name>Vijay Aggarwal</name>
-      <email>aggarwav@us.ibm.com</email>
-    </developer>
-    <developer>
-      <id>imvijay2007</id>
-      <name>Vijay Jegaselvan</name>
-      <email>vjegase@us.ibm.com</email>
-    </developer>
-    <developer>
-      <id>ejodet</id>
-      <name>Eric Jodet</name>
-      <email>eric_jodet@fr.ibm.com</email>
-    </developer>
-    <developer>
-      <id>patjoy</id>
-      <name>Patrick Joy</name>
-      <email>patrick.joy1@ibm.com</email>
+      <id>aberk</id>
+      <name>Andy Berkebile</name>
+      <email>aberkeb1@us.ibm.com</email>
     </developer>
   </developers>
 
@@ -223,9 +203,9 @@
         <version>2.11.2</version>
     </dependency>
     <dependency>
-        <groupId>org.eclipse.hudson.plugins</groupId>
+        <groupId>org.jenkins-ci.plugins</groupId>
         <artifactId>git</artifactId>
-        <version>3.0.1</version>
+        <version>3.6.0</version>
     </dependency>
     <dependency>
         <groupId>org.jenkins-ci.plugins.workflow</groupId>
@@ -242,6 +222,12 @@
       <artifactId>acegi-security</artifactId>
       <version>1.0.7</version>
       <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.ibm.devops</groupId>
+      <artifactId>ibm-cloud-devops</artifactId>
+      <version>1.1.18</version>
+      <optional>true</optional>
     </dependency>
   </dependencies>
 </project>

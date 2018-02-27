@@ -1,7 +1,7 @@
 package com.ibm.devops.connect;
 
 import org.jenkinsci.plugins.uniqueid.IdStore;
-import com.ibm.devops.dra.DevOpsGlobalConfiguration;
+import com.ibm.devops.connect.DevOpsGlobalConfiguration;
 import jenkins.model.Jenkins;
 
 public class JenkinsIntegrationId {

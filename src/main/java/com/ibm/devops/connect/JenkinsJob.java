@@ -37,7 +37,6 @@ import org.jenkinsci.plugins.uniqueid.IdStore;
 
 import java.util.List;
 import jenkins.model.Jenkins;
-import com.ibm.devops.dra.DevOpsGlobalConfiguration;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 
 /**

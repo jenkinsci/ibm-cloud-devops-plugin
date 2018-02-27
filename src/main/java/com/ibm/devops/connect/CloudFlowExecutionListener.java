@@ -41,8 +41,6 @@ import net.sf.json.JSONArray;
 
 import com.ibm.devops.connect.CloudCause.JobStatus;
 
-import com.ibm.devops.dra.DevOpsGlobalConfiguration;
-
 import org.jenkinsci.plugins.workflow.flow.FlowExecutionListener;
 import org.jenkinsci.plugins.workflow.flow.FlowExecution;
 import org.jenkinsci.plugins.workflow.steps.StepExecution;
