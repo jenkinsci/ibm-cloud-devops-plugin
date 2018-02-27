@@ -17,9 +17,7 @@ package com.ibm.devops.connect;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ibm.devops.dra.AbstractDevOpsAction;
-import com.ibm.devops.dra.DevOpsGlobalConfiguration;
-import com.ibm.devops.dra.PublishDeploy.PublishDeployImpl;
+import com.ibm.devops.connect.DevOpsGlobalConfiguration;
 
 import net.sf.json.JSONObject;
 import net.sf.json.JSONArray;
@@ -48,6 +46,8 @@ import java.util.TimeZone;
 import java.net.URLEncoder;
 
 import org.apache.commons.codec.binary.Base64;
+
+import com.ibm.devops.connect.Endpoints.EndpointManager;
 
 import org.jenkinsci.plugins.uniqueid.IdStore;
 
@@ -117,7 +117,6 @@ public class CloudPublisher  {
     public boolean uploadJobStatus(JSONObject jobStatus) {
 
         String url = this.getSyncApiUrl() + JENKINS_JOB_STATUS_ENDPOINT_URL;
-
         return postToSyncAPI(url, jobStatus.toString());
     }
 

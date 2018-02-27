@@ -40,8 +40,7 @@ import net.sf.json.JSONObject;
 import net.sf.json.JSONArray;
 
 import com.ibm.devops.connect.CloudCause.JobStatus;
-
-import com.ibm.devops.dra.DevOpsGlobalConfiguration;
+import com.ibm.devops.connect.Status.JenkinsJobStatus;
 
 @Extension
 public class CloudBuildStepListener extends BuildStepListener {
@@ -53,7 +52,7 @@ public class CloudBuildStepListener extends BuildStepListener {
         if (cloudCause == null) {
             cloudCause = new CloudCause();
         }
-        JenkinsJobStatus status = new JenkinsJobStatus(build, cloudCause, bs, false, !canContinue);
+        JenkinsJobStatus status = new JenkinsJobStatus(build, cloudCause, bs, listener, false, !canContinue);
         JSONObject statusUpdate = status.generate();
         CloudPublisher cloudPublisher = new CloudPublisher();
         cloudPublisher.uploadJobStatus(statusUpdate);
@@ -62,7 +61,7 @@ public class CloudBuildStepListener extends BuildStepListener {
     public void started(AbstractBuild build, BuildStep bs, BuildListener listener) {
         // We listen to jobs that are started by IBM Cloud only
         if(this.shouldListen(build)) {
-            JenkinsJobStatus status = new JenkinsJobStatus(build, getCloudCause(build), bs, true, false);
+            JenkinsJobStatus status = new JenkinsJobStatus(build, getCloudCause(build), bs, listener, true, false);
             JSONObject statusUpdate = status.generate();
             CloudPublisher cloudPublisher = new CloudPublisher();
             cloudPublisher.uploadJobStatus(statusUpdate);

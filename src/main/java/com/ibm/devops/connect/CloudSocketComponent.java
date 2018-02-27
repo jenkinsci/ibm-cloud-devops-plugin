@@ -17,7 +17,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ibm.devops.dra.DevOpsGlobalConfiguration;
+import com.ibm.devops.connect.DevOpsGlobalConfiguration;
 
 import com.ibm.cloud.urbancode.connect.client.ConnectSocket;
 import com.ibm.cloud.urbancode.connect.client.Listeners;

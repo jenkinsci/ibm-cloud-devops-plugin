@@ -27,6 +27,7 @@ import net.sf.json.*;
 import jenkins.model.Jenkins;
 import jenkins.model.ParameterizedJobMixIn;
 import hudson.model.AbstractProject;
+import hudson.model.AbstractItem;
 import hudson.model.Action;
 import hudson.model.ParametersAction;
 import hudson.model.CauseAction;
@@ -40,6 +41,7 @@ import hudson.model.Queue;
 import hudson.model.Item;
 import hudson.model.ParameterDefinition;
 import hudson.model.ParametersDefinitionProperty;
+import hudson.model.JobProperty;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -59,11 +61,7 @@ import com.ibm.devops.connect.CloudCause.JobStatus;
 import com.ibm.devops.connect.SecuredAction.TriggerJob.TriggerJobParamObj;
 import com.ibm.devops.connect.SecuredAction.TriggerJob;
 
-//////TEMP
-
-import hudson.ExtensionList;
-import hudson.ExtensionPoint;
-import org.jenkinsci.plugins.workflow.flow.FlowExecutionListener;
+import com.ibm.devops.connect.Status.JenkinsJobStatus;
 
 /*
  * When Spring is applying the @Transactional annotation, it creates a proxy class which wraps your class.
@@ -131,6 +129,7 @@ public class CloudWorkListener implements IWorkListener {
                     log.info("Item Found (3): " + item);
                 }
 
+                System.out.println("HEEEEEEEYYYYYYY------------------------->>>>");
                 List<ParameterValue> parametersList = generateParamList(incomingJob, getParameterTypeMap(item));
 
                 JSONObject returnProps = new JSONObject();
@@ -153,6 +152,9 @@ public class CloudWorkListener implements IWorkListener {
                 } else if (item instanceof WorkflowJob) {
                     WorkflowJob workflowJob = (WorkflowJob)item;
 
+                    System.out.println("\n\n\t\t\t&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&");
+                    System.out.println(parametersList);
+
                     QueueTaskFuture queuedTask = workflowJob.scheduleBuild2(0, new ParametersAction(parametersList), new CauseAction(cloudCause));
 
                     if (queuedTask == null) {
@@ -167,7 +169,7 @@ public class CloudWorkListener implements IWorkListener {
                 }
 
                 if( errorMessage != null ) {
-                    JenkinsJobStatus erroredJobStatus = new JenkinsJobStatus(null, cloudCause, null, true, true);
+                    JenkinsJobStatus erroredJobStatus = new JenkinsJobStatus(null, cloudCause, null, null, true, true);
                     JSONObject statusUpdate = erroredJobStatus.generateErrorStatus(errorMessage);
                     CloudPublisher cloudPublisher = new CloudPublisher();
                     cloudPublisher.uploadJobStatus(statusUpdate);
@@ -196,6 +198,11 @@ public class CloudWorkListener implements IWorkListener {
     private List<ParameterValue> generateParamList (JSONObject incomingJob, Map<String, String> typeMap) {
         ArrayList<ParameterValue> result = new ArrayList<ParameterValue>();
 
+        System.out.println("000000000000000000000000000000000");
+        System.out.println(incomingJob.toString());
+        System.out.println(typeMap.toString());
+        System.out.println("000000000000000000000000000000000");
+
         if(incomingJob.has("props")) {
             JSONObject props = incomingJob.getJSONObject("props");
             Iterator<String> keys = props.keys();
@@ -205,6 +212,10 @@ public class CloudWorkListener implements IWorkListener {
                 String type = typeMap.get(key);
 
                 ParameterValue paramValue;
+
+                System.out.println("->\t\t" + key);
+                System.out.println("->\t\t" + value);
+                System.out.println("->\t\t" + type);
 
                 if(type == null) {
 
@@ -231,8 +242,19 @@ public class CloudWorkListener implements IWorkListener {
     private Map<String, String> getParameterTypeMap(Item item) {
         Map<String, String> result = new HashMap<String, String>();
 
-        if(item instanceof AbstractProject) {
-            List<Action> actions = ((AbstractProject)item).getActions();
+        if(item instanceof WorkflowJob) {
+            List<JobProperty<? super WorkflowJob>> properties = ((WorkflowJob)item).getAllProperties();
+
+			for(JobProperty property : properties) {
+				if (property instanceof ParametersDefinitionProperty) {
+					List<ParameterDefinition> paraDefs = ((ParametersDefinitionProperty)property).getParameterDefinitions();
+					for (ParameterDefinition paramDef : paraDefs) {
+                        result.put(paramDef.getName(), paramDef.getType());
+					}
+				}
+			}
+        } else if(item instanceof AbstractItem) {
+            List<Action> actions = ((AbstractItem)item).getActions();
 
 			for(Action action : actions) {
 				if (action instanceof ParametersDefinitionProperty) {

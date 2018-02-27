@@ -17,6 +17,8 @@ import org.slf4j.LoggerFactory;
 
 import com.ibm.devops.connect.CloudItemListener;
 
+import com.ibm.devops.connect.Endpoints.EndpointManager;
+
 @Extension
 public class ConnectComputerListener extends ComputerListener {
 	public static final Logger log = LoggerFactory.getLogger(ConnectComputerListener.class);

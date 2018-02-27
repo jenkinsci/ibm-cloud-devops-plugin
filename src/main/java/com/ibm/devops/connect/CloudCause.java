@@ -8,6 +8,8 @@ import java.util.Set;
 import java.util.ArrayList;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONArray;
+import com.ibm.devops.connect.Status.DRAData;
+import com.ibm.devops.connect.Status.SourceData;
 
 /**
 * This is the cause object that is attached to a build if it is started by the IBM Cloud.
@@ -86,17 +88,17 @@ public class CloudCause extends Cause {
     }
 
     public void updateLastStep(String name, String status, String message, boolean isFatal) {
-        JSONObject obj = steps.get(steps.size() - 1);
-        if(name != null) {
-            obj.put("name", name);
+        if (steps.size() == 0) {
+            addStep(name, status, message, isFatal);
+        } else {
+            JSONObject obj = steps.get(steps.size() - 1);
+            if(name != null) {
+                obj.put("name", name);
+            }
+            obj.put("status", status);
+            obj.put("message", message);
+            obj.put("isFatal", isFatal);
         }
-        obj.put("status", status);
-        obj.put("message", message);
-        obj.put("isFatal", isFatal);
-    }
-
-    public void addSourceData(String branch, String revision, String scmName, Set<String> remoteUrls) {
-
     }
 
     public Boolean isCreatedByCR() {
@@ -109,7 +111,7 @@ public class CloudCause extends Cause {
 
     public JSONArray getStepsArray() {
         JSONArray result = new JSONArray();
-        for(JSONObject obj : steps) {
+        for (JSONObject obj : steps) {
             result.add(obj);
         }
 

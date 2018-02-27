@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.HashSet;
 
 import com.ibm.devops.connect.CloudCause.JobStatus;
+import com.ibm.devops.connect.Status.JenkinsPipelineStatus;
 
 @Extension
 public class CloudRunListener extends RunListener<WorkflowRun> {
@@ -43,7 +44,7 @@ public class CloudRunListener extends RunListener<WorkflowRun> {
         if (cloudCause == null) {
             cloudCause = new CloudCause();
         }
-        JenkinsPipelineStatus status = new JenkinsPipelineStatus(workflowRun, cloudCause, null, true, false);
+        JenkinsPipelineStatus status = new JenkinsPipelineStatus(workflowRun, cloudCause, null, listener, true, false);
         JSONObject statusUpdate = status.generate();
         CloudPublisher cloudPublisher = new CloudPublisher();
         cloudPublisher.uploadJobStatus(statusUpdate);
@@ -55,7 +56,7 @@ public class CloudRunListener extends RunListener<WorkflowRun> {
         if (cloudCause == null) {
             cloudCause = new CloudCause();
         }
-        JenkinsPipelineStatus status = new JenkinsPipelineStatus(workflowRun, cloudCause, null, false, false);
+        JenkinsPipelineStatus status = new JenkinsPipelineStatus(workflowRun, cloudCause, null, listener, false, false);
         JSONObject statusUpdate = status.generate();
         CloudPublisher cloudPublisher = new CloudPublisher();
         cloudPublisher.uploadJobStatus(statusUpdate);

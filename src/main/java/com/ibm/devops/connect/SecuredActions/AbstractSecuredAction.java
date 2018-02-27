@@ -4,7 +4,7 @@ import org.acegisecurity.context.SecurityContextHolder;
 import org.acegisecurity.providers.UsernamePasswordAuthenticationToken;
 import hudson.security.SecurityRealm;
 import org.acegisecurity.userdetails.UserDetails;
-import com.ibm.devops.dra.DevOpsGlobalConfiguration;
+import com.ibm.devops.connect.DevOpsGlobalConfiguration;
 import jenkins.model.Jenkins;
 import org.acegisecurity.Authentication;
 import org.acegisecurity.context.SecurityContextHolder;
