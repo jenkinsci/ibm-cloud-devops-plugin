@@ -72,9 +72,13 @@ public class PublishSQStepExecution extends AbstractSynchronousNonBlockingStepEx
 
         // optional build number, if user wants to set their own build number
         String buildNumber = step.getBuildNumber();
+        String appName = step.getAppName();
         PublishSQ publisher = new PublishSQ(requiredEnvVars, requiredParams);
         if (!isNullOrEmpty(buildNumber)) {
             publisher.setBuildNumber(buildNumber);
+        }
+        if (!isNullOrEmpty(appName)) {
+            publisher.setAppName(appName);
         }
         publisher.perform(build, ws, launcher, listener);
         return null;
