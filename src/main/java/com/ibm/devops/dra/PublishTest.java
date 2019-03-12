@@ -161,6 +161,11 @@ public class PublishTest extends AbstractDevOpsAction implements SimpleBuildStep
     public void setBuildNumber(String buildNumber) {
         this.buildNumber = buildNumber;
     }
+    
+    @DataBoundSetter
+    public void setAppName(String applicationName) {
+        this.applicationName = applicationName;
+    }
 
     /**
      * We'll use this from the <tt>config.jelly</tt>.

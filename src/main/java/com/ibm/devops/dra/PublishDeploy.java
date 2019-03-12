@@ -44,6 +44,7 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
 
 import javax.annotation.Nonnull;
@@ -123,6 +124,11 @@ public class PublishDeploy extends AbstractDevOpsAction implements SimpleBuildSt
 	public void setApplicationUrl(String applicationUrl) {
 		this.applicationUrl = applicationUrl;
 	}
+	
+    @DataBoundSetter
+    public void setAppName(String applicationName) {
+        this.applicationName = applicationName;
+    }
 
 	/**
 	 * We'll use this from the <tt>config.jelly</tt>.

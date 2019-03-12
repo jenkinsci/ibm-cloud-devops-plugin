@@ -32,6 +32,7 @@ import jenkins.model.Jenkins;
 import jenkins.tasks.SimpleBuildStep;
 import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
 
 import javax.annotation.Nonnull;
@@ -119,6 +120,11 @@ public class EvaluateGate extends AbstractDevOpsAction implements SimpleBuildSte
 
     public void setBuildNumber(String buildNumber) {
         this.buildNumber = buildNumber;
+    }
+    
+    @DataBoundSetter
+    public void setAppName(String applicationName) {
+        this.applicationName = applicationName;
     }
 
     /**

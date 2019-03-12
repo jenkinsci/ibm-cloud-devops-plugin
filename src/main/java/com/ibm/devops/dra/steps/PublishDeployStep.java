@@ -31,6 +31,7 @@ public class PublishDeployStep extends AbstractDevOpsStep {
     // custom build number, optional
     private String buildNumber;
     private String appUrl;
+    private String appName;
 
     @DataBoundConstructor
     public PublishDeployStep(String result, String environment) {
@@ -46,6 +47,15 @@ public class PublishDeployStep extends AbstractDevOpsStep {
     @DataBoundSetter
     public void setAppUrl(String appUrl) {
         this.appUrl = appUrl;
+    }
+    
+    @DataBoundSetter
+    public void setAppName(String appName) {
+        this.appName = appName;
+    }
+    
+    public String getAppName() {
+    	return appName;
     }
 
     public String getBuildNumber() {

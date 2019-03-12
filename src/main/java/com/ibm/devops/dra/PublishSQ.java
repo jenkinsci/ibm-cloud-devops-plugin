@@ -49,6 +49,7 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
 
 import javax.annotation.Nonnull;
@@ -135,6 +136,12 @@ public class PublishSQ extends AbstractDevOpsAction implements SimpleBuildStep {
     public void setBuildNumber(String buildNumber) {
         this.buildNumber = buildNumber;
     }
+    
+    @DataBoundSetter
+    public void setAppName(String applicationName) {
+        this.applicationName = applicationName;
+    }
+    
     /**
      * We'll use this from the <tt>config.jelly</tt>.
      */

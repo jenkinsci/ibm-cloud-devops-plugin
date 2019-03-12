@@ -120,7 +120,7 @@ public class PublishBuild extends AbstractDevOpsAction implements SimpleBuildSte
     }
 
     @DataBoundSetter
-    public void setApplicationName(String applicationName) {
+    public void setAppName(String applicationName) {
         this.applicationName = applicationName;
     }
 
