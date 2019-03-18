@@ -73,7 +73,7 @@ public class PublishDeploy extends AbstractDevOpsAction implements SimpleBuildSt
 	private String applicationUrl;
 	private String buildNumber;
 
-	// fields to support jenkins pipeline
+	//fields to support jenkins pipeline
 	private String result;
 	private String username;
 	private String password;
@@ -81,8 +81,13 @@ public class PublishDeploy extends AbstractDevOpsAction implements SimpleBuildSt
 	private String env;
 
 	@DataBoundConstructor
-	public PublishDeploy(String applicationName, String toolchainName, String buildJobName, String environmentName,
-			String credentialsId, String applicationUrl, OptionalBuildInfo additionalBuildInfo) {
+	public PublishDeploy(String applicationName,
+						 String toolchainName,
+						 String buildJobName,
+						 String environmentName,
+						 String credentialsId,
+						 String applicationUrl,
+						 OptionalBuildInfo additionalBuildInfo) {
 		this.applicationName = applicationName;
 		this.toolchainName = toolchainName;
 		this.buildJobName = buildJobName;
@@ -119,11 +124,11 @@ public class PublishDeploy extends AbstractDevOpsAction implements SimpleBuildSt
 	public void setApplicationUrl(String applicationUrl) {
 		this.applicationUrl = applicationUrl;
 	}
-
-	@DataBoundSetter
-	public void setApplicationName(String applicationName) {
-		this.applicationName = applicationName;
-	}
+	
+    @DataBoundSetter
+    public void setApplicationName(String applicationName) {
+        this.applicationName = applicationName;
+    }
 
 	/**
 	 * We'll use this from the <tt>config.jelly</tt>.
@@ -178,8 +183,7 @@ public class PublishDeploy extends AbstractDevOpsAction implements SimpleBuildSt
 		String env = isNullOrEmpty(this.env) ? DEFAULT_ENV : this.env;
 
 		try {
-			// Get the project name and build id from environment and expand the
-			// vars
+			// Get the project name and build id from environment and expand the vars
 			String applicationName = expandVariable(this.applicationName, envVars, true);
 			String environmentName = expandVariable(this.environmentName, envVars, true);
 			String toolchainId = expandVariable(this.toolchainName, envVars, true);
@@ -187,20 +191,18 @@ public class PublishDeploy extends AbstractDevOpsAction implements SimpleBuildSt
 			String OTCbrokerUrl = getOTCBrokerServer(env);
 
 			// get IBM cloud environment and token
-			String buildNumber = isNullOrEmpty(this.buildNumber)
-					? getBuildNumber(envVars, buildJobName, build, printStream) : envVars.expand(this.buildNumber);
-			String bluemixToken = getIBMCloudToken(this.credentialsId, this.apikey, this.username, this.password, env,
-					build.getParent(), printStream);
+			String buildNumber = isNullOrEmpty(this.buildNumber) ?
+					getBuildNumber(envVars, buildJobName, build, printStream) : envVars.expand(this.buildNumber);
+			String bluemixToken = getIBMCloudToken(this.credentialsId, this.apikey, this.username, this.password,
+					env, build.getParent(), printStream);
 
-			Map<String, String> endpoints = getAllEndpoints(OTCbrokerUrl, bluemixToken, toolchainId);
-			;
+			Map<String, String> endpoints = getAllEndpoints(OTCbrokerUrl, bluemixToken, toolchainId);;
 			String dlmsUrl = endpoints.get(DLMS) + DEPLOYMENT_API_URL;
 			dlmsUrl = setDLMSUrl(dlmsUrl, toolchainId, applicationName, buildNumber);
 			String link = getDeploymentRiskUrl(endpoints.get(CONTROL_CENTER), toolchainId);
 
 			String deployStatus = getJobResult(build, this.result);
-			uploadDeploymentInfo(bluemixToken, dlmsUrl, build, applicationUrl, environmentName, toolchainId,
-					deployStatus);
+			uploadDeploymentInfo(bluemixToken, dlmsUrl, build, applicationUrl, environmentName, toolchainId, deployStatus);
 			printStream.println(getMessageWithVar(CHECK_DEPLOY_STATUS, link));
 		} catch (Exception e) {
 			printStream.println(getMessageWithPrefix(GOT_ERRORS) + e.getMessage());
@@ -208,7 +210,7 @@ public class PublishDeploy extends AbstractDevOpsAction implements SimpleBuildSt
 	}
 
 	private void uploadDeploymentInfo(String token, String dlmsUrl, Run build, String applicationUrl,
-			String environmentName, String toolchainId, String deployStatsus) throws Exception {
+									  String environmentName, String toolchainId, String deployStatsus) throws Exception {
 		String resStr;
 		CloseableHttpClient httpClient = HttpClients.createDefault();
 		HttpPost postMethod = new HttpPost(dlmsUrl);
@@ -224,8 +226,8 @@ public class PublishDeploy extends AbstractDevOpsAction implements SimpleBuildSt
 
 		// build up the json body
 		Gson gson = new Gson();
-		DeploymentInfoModel deploymentInfo = new DeploymentInfoModel(applicationUrl, environmentName, jobUrl,
-				deployStatsus, timestamp);
+		DeploymentInfoModel deploymentInfo = new DeploymentInfoModel(applicationUrl, environmentName, jobUrl, deployStatsus,
+				timestamp);
 		String json = gson.toJson(deploymentInfo);
 		StringEntity data = new StringEntity(json, "UTF-8");
 		postMethod.setEntity(data);
@@ -247,11 +249,9 @@ public class PublishDeploy extends AbstractDevOpsAction implements SimpleBuildSt
 			JsonElement element = parser.parse(resStr);
 			JsonObject resJson = element.getAsJsonObject();
 			if (resJson != null && resJson.has("message")) {
-				throw new Exception(getMessageWithVar(FAIL_TO_UPLOAD_DATA_WITH_REASON, String.valueOf(statusCode),
-						resJson.get("message").getAsString()));
+				throw new Exception(getMessageWithVar(FAIL_TO_UPLOAD_DATA_WITH_REASON, String.valueOf(statusCode), resJson.get("message").getAsString()));
 			} else {
-				throw new Exception(getMessageWithVar(FAIL_TO_UPLOAD_DATA_WITH_REASON, String.valueOf(statusCode),
-						resJson == null ? getMessage(FAIL_TO_GET_RESPONSE) : resJson.toString()));
+				throw new Exception(getMessageWithVar(FAIL_TO_UPLOAD_DATA_WITH_REASON, String.valueOf(statusCode), resJson == null ? getMessage(FAIL_TO_GET_RESPONSE) : resJson.toString()));
 			}
 		}
 	}
@@ -270,11 +270,12 @@ public class PublishDeploy extends AbstractDevOpsAction implements SimpleBuildSt
 	}
 
 	/**
-	 * Descriptor for {@link PublishBuild}. Used as a singleton. The class is
-	 * marked as public so that it can be accessed from views.
+	 * Descriptor for {@link PublishBuild}. Used as a singleton. The
+	 * class is marked as public so that it can be accessed from views.
 	 *
 	 * <p>
-	 * See <tt>src/main/resources/com/ibm/devops/dra/PublishBuild/*.jelly</tt>
+	 * See
+	 * <tt>src/main/resources/com/ibm/devops/dra/PublishBuild/*.jelly</tt>
 	 * for the actual HTML fragment for the configuration screen.
 	 */
 	@Extension // This indicates to Jenkins that this is an implementation of an
@@ -314,7 +315,8 @@ public class PublishDeploy extends AbstractDevOpsAction implements SimpleBuildSt
 			return FormValidation.validateRequired(value);
 		}
 
-		public FormValidation doCheckToolchainName(@QueryParameter String value) throws IOException, ServletException {
+		public FormValidation doCheckToolchainName(@QueryParameter String value)
+				throws IOException, ServletException {
 			if (value == null || value.equals("empty")) {
 				return FormValidation.errorWithMarkup(getMessageWithPrefix(TOOLCHAIN_ID_IS_REQUIRED));
 			}
@@ -327,7 +329,7 @@ public class PublishDeploy extends AbstractDevOpsAction implements SimpleBuildSt
 		}
 
 		public FormValidation doTestConnection(@AncestorInPath ItemGroup context,
-				@QueryParameter("credentialsId") final String credentialsId) {
+											   @QueryParameter("credentialsId") final String credentialsId) {
 			String environment = "prod";
 			String targetAPI = chooseTargetAPI(environment);
 			String iamAPI = chooseIAMAPI(environment);
@@ -343,9 +345,7 @@ public class PublishDeploy extends AbstractDevOpsAction implements SimpleBuildSt
 
 		/**
 		 * Autocompletion for build job name field
-		 * 
-		 * @param value
-		 *            - user input for the build job name field
+		 * @param value - user input for the build job name field
 		 * @return
 		 */
 		public AutoCompletionCandidates doAutoCompleteBuildJobName(@QueryParameter String value) {
