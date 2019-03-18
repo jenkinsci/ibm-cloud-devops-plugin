@@ -123,7 +123,7 @@ public class EvaluateGate extends AbstractDevOpsAction implements SimpleBuildSte
     }
     
     @DataBoundSetter
-    public void setAppName(String applicationName) {
+    public void setApplicationName(String applicationName) {
         this.applicationName = applicationName;
     }
 

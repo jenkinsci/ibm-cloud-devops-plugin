@@ -30,7 +30,6 @@ public class PublishBuildStep extends AbstractDevOpsStep {
 
     // custom build number, optional
     private String buildNumber;
-    private String appName;
 
     @DataBoundConstructor
     public PublishBuildStep(String result, String gitRepo, String gitBranch, String gitCommit) {
@@ -45,15 +44,6 @@ public class PublishBuildStep extends AbstractDevOpsStep {
         this.buildNumber = buildNumber;
     }
     
-    @DataBoundSetter
-    public void setAppName(String appName) {
-        this.appName = appName;
-    }
-    
-    public String getAppName() {
-    	return appName;
-    }
-
     public String getGitRepo() {
         return gitRepo;
     }

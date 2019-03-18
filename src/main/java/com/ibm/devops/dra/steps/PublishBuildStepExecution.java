@@ -69,7 +69,7 @@ public class PublishBuildStepExecution extends AbstractSynchronousNonBlockingSte
 
         // optional build number, if user wants to set their own build number
         String buildNumber = step.getBuildNumber();
-        String appName = step.getAppName();
+        String appName = step.getApplicationName();
 
         if (!allNotNullOrEmpty(requiredParams, printStream)) {
             printStream.println(getMessageWithVar(MISS_REQUIRED_STEP_PARAMS, "publishBuildRecord"));
@@ -82,7 +82,7 @@ public class PublishBuildStepExecution extends AbstractSynchronousNonBlockingSte
                 publishBuild.setBuildNumber(buildNumber);
             }
             if (!isNullOrEmpty(appName)) {
-                publishBuild.setAppName(appName);
+                publishBuild.setApplicationName(appName);
             }
             publishBuild.perform(build, ws, launcher, listener);
         } else {

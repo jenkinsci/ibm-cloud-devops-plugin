@@ -32,7 +32,6 @@ public class PublishTestStep extends AbstractDevOpsStep {
 
     // optional form fields for fvt
     private String environment;
-    private String appName;
 
     @DataBoundConstructor
     public PublishTestStep(String type, String fileLocation) {
@@ -48,15 +47,6 @@ public class PublishTestStep extends AbstractDevOpsStep {
     @DataBoundSetter
     public void setBuildNumber(String buildNumber) {
         this.buildNumber = buildNumber;
-    }
-    
-    @DataBoundSetter
-    public void setAppName(String appName) {
-        this.appName = appName;
-    }
-    
-    public String getAppName() {
-    	return appName;
     }
 
     public String getBuildNumber() {

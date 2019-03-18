@@ -69,7 +69,7 @@ public class PublishTestStepExecution extends AbstractSynchronousNonBlockingStep
         // optional build number, if user wants to set their own build number
         String buildNumber = step.getBuildNumber();
         String envName = step.getEnvironment();
-        String appName = step.getAppName();
+        String appName = step.getApplicationName();
 
         if (!allNotNullOrEmpty(requiredParams, printStream)) {
             printStream.println(getMessageWithVar(MISS_REQUIRED_STEP_PARAMS, "publishTestResult"));
@@ -80,7 +80,7 @@ public class PublishTestStepExecution extends AbstractSynchronousNonBlockingStep
         if (!isNullOrEmpty(envName)) publishTest.setEnvName(envName);
         if (!isNullOrEmpty(buildNumber)) publishTest.setBuildNumber(buildNumber);
         if (!isNullOrEmpty(appName)) {
-            publishTest.setAppName(appName);
+            publishTest.setApplicationName(appName);
         }
         publishTest.perform(build, ws, launcher, listener);
         return null;

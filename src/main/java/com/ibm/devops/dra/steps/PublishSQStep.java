@@ -31,7 +31,6 @@ public class PublishSQStep extends AbstractDevOpsStep {
     // custom build number, optional
     private String buildNumber;
     private String environment;
-    private String appName;
 
     @DataBoundConstructor
     public PublishSQStep(String SQHostURL, String SQAuthToken, String SQProjectKey) {
@@ -64,15 +63,6 @@ public class PublishSQStep extends AbstractDevOpsStep {
     @DataBoundSetter
     public void setBuildNumber(String buildNumber) {
         this.buildNumber = buildNumber;
-    }
-    
-    @DataBoundSetter
-    public void setAppName(String appName) {
-        this.appName = appName;
-    }
-    
-    public String getAppName() {
-    	return appName;
     }
 
     public String getBuildNumber() {
