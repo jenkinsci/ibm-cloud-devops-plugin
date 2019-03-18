@@ -126,7 +126,7 @@ public class PublishDeploy extends AbstractDevOpsAction implements SimpleBuildSt
 	}
 	
     @DataBoundSetter
-    public void setAppName(String applicationName) {
+    public void setApplicationName(String applicationName) {
         this.applicationName = applicationName;
     }
 

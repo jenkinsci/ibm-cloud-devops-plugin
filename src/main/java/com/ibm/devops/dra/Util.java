@@ -323,7 +323,9 @@ public class Util {
     public static boolean allNotNullOrEmpty(HashMap<String, String> vars, PrintStream printStream) {
         for (Map.Entry<String, String> e : vars.entrySet()) {
             if (isNullOrEmpty(e.getValue())) {
-				if (e.getKey().contains("IBM"))
+            	if (e.getKey() == "IBM_CLOUD_DEVOPS_APP_NAME")
+					printStream.println("[IBM Cloud DevOps] Missing Application Name. Pass --applicationName parameter to the step or set the environment variable \"" + e.getKey() + "\" ");
+				else if (e.getKey().contains("IBM"))
 					printStream.println("[IBM Cloud DevOps] Missing environment variables \"" + e.getKey() + "\" configurations");
 				else
 					printStream.println("[IBM Cloud DevOps] Missing required parameters, \"" + e.getKey() + "\"");

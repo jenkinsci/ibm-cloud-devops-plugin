@@ -31,7 +31,6 @@ public class EvaluateGateStep extends AbstractDevOpsStep {
     private String forceDecision;
     private String environment;
     private String buildNumber;
-    private String appName;
 
     @DataBoundConstructor
     public EvaluateGateStep(String policy) {
@@ -51,15 +50,6 @@ public class EvaluateGateStep extends AbstractDevOpsStep {
     @DataBoundSetter
     public void setBuildNumber(String buildNumber) {
         this.buildNumber = buildNumber;
-    }
-    
-    @DataBoundSetter
-    public void setAppName(String appName) {
-        this.appName = appName;
-    }
-    
-    public String getAppName() {
-    	return appName;
     }
 
     public String getBuildNumber() {

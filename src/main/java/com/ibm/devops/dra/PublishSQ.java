@@ -138,7 +138,7 @@ public class PublishSQ extends AbstractDevOpsAction implements SimpleBuildStep {
     }
     
     @DataBoundSetter
-    public void setAppName(String applicationName) {
+    public void setApplicationName(String applicationName) {
         this.applicationName = applicationName;
     }
     
