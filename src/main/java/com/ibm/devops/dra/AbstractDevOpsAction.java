@@ -72,8 +72,8 @@ public abstract class AbstractDevOpsAction extends Recorder {
     private final static String IAM_GRANT_TYPE = "urn:ibm:params:oauth:grant-type:apikey";
     private final static String IAM_RESPONSE_TYPE = "cloud_iam";
     public static final String DEFAULT_ENV = "prod";
-    private static final String OTC_BROKER_ENDPOINT_ENV = "https://otcbroker-%(env).us-south.devopsinsights.cloud.ibm.com";
-    private static final String OTC_BROKER_ENDPOINT = "https://otcbroker.us-south.devopsinsights.cloud.ibm.com";
+    private static final String OTC_BROKER_ENDPOINT_ENV = "https://otcbroker-%(env).devopsinsights.cloud.ibm.com";
+    private static final String OTC_BROKER_ENDPOINT = "https://otcbroker.devopsinsights.cloud.ibm.com";
     private static final String OTC_BROKER_PART = "/globalauth/toolchainids/";
     private static final String POLICY_PART = "/api/v5/toolchainids/{toolchain_name}/policies";
     public static final String DLMS = "dlms";
@@ -85,29 +85,32 @@ public abstract class AbstractDevOpsAction extends Recorder {
     private final static String REPORT_ID_PART = "reportId";
 
     private static Map<String, String> TARGET_API_MAP = ImmutableMap.of(
-            "prod", "https://api.ng.bluemix.net",
-            "dev", "https://api.stage1.ng.bluemix.net",
-            "staging", "https://api.stage1.ng.bluemix.net"
+            "prod", "https://cloud.ibm.com",
+            "dev", "https://test.cloud.ibm.com",
+            "staging", "https://test.cloud.ibm.com"
     );
 
     private static Map<String, String> IAM_API_MAP = ImmutableMap.of(
-            "prod", "https://iam.bluemix.net/identity/token?",
-            "dev", "https://iam.stage1.bluemix.net/identity/token?",
-            "staging", "https://iam.stage1.bluemix.net/identity/token?"
+            "prod", "https://iam.cloud.ibm.com/identity/token?",
+            "dev", "https://iam.test.cloud.ibm.com/identity/token?",
+            "staging", "https://iam.test.cloud.ibm.com/identity/token?"
     );
 
+    // The map below is used by notification code maintained by Eric Jodet
     private static Map<String, String> ORGANIZATIONS_URL_MAP = ImmutableMap.of(
             "prod", "https://api.ng.bluemix.net/v2/organizations?q=name:",
             "dev", "https://api.stage1.ng.bluemix.net/v2/organizations?q=name:",
             "staging", "https://api.stage1.ng.bluemix.net/v2/organizations?q=name:"
     );
 
+    // The map below is used by notification code maintained by Eric Jodet
     private static Map<String, String> SPACES_URL_MAP = ImmutableMap.of(
             "prod", "https://api.ng.bluemix.net/v2/spaces?q=name:",
             "dev", "https://api.stage1.ng.bluemix.net/v2/spaces?q=name:",
             "staging", "https://api.stage1.ng.bluemix.net/v2/spaces?q=name:"
     );
 
+    // The map below is used by notification code maintained by Eric Jodet
     private static Map<String, String> APPS_URL_MAP = ImmutableMap.of(
             "prod", "https://api.ng.bluemix.net/v2/apps?q=name:",
             "dev", "https://api.stage1.ng.bluemix.net/v2/apps?q=name:",
