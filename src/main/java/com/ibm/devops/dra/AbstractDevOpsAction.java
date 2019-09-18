@@ -73,7 +73,7 @@ public abstract class AbstractDevOpsAction extends Recorder {
     private final static String IAM_RESPONSE_TYPE = "cloud_iam";
     public static final String DEFAULT_ENV = "prod";
     private static final String OTC_BROKER_ENDPOINT_ENV = "https://otcbroker-%(env).us-south.devopsinsights.cloud.ibm.com";
-    private static final String OTC_BROKER_ENDPOINT = "https://otcbroker.us-south.devopsinsights.cloud.ibm.com";
+    private static final String OTC_BROKER_ENDPOINT = "https://otcbroker.devopsinsights.cloud.ibm.com";
     private static final String OTC_BROKER_PART = "/globalauth/toolchainids/";
     private static final String POLICY_PART = "/api/v5/toolchainids/{toolchain_name}/policies";
     public static final String DLMS = "dlms";
@@ -91,9 +91,9 @@ public abstract class AbstractDevOpsAction extends Recorder {
     );
 
     private static Map<String, String> IAM_API_MAP = ImmutableMap.of(
-            "prod", "https://iam.bluemix.net/identity/token?",
-            "dev", "https://iam.stage1.bluemix.net/identity/token?",
-            "staging", "https://iam.stage1.bluemix.net/identity/token?"
+            "prod", "https://iam.cloud.ibm.com/identity/token?",
+            "dev", "https://iam.test.cloud.ibm.com/identity/token?",
+            "staging", "https://iam.test.cloud.ibm.com/identity/token?"
     );
 
     private static Map<String, String> ORGANIZATIONS_URL_MAP = ImmutableMap.of(
