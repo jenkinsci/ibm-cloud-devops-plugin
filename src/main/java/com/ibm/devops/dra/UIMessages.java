@@ -49,6 +49,7 @@ public class UIMessages {
     public static final String SO_PROJECT_KEY_NOT_FOUND = "SO_PROJECT_KEY_NOT_FOUND";
     public static final String SQ_OTHER_EXCEPTION = "SQ_OTHER_EXCEPTION";
     public static final String UPLOAD_SQ_SUCCESS = "UPLOAD_SQ_SUCCESS";
+    public static final String WARNING_NO_BUILD = "WARNING_NO_BUILD";
     public static final String UPLOAD_FILE_SUCCESS = "UPLOAD_FILE_SUCCESS";
     public static final String UNSUPPORTED_RESULT_FILE = "UNSUPPORTED_RESULT_FILE";
     public static final String FAIL_TO_UPLOAD_DATA_WITH_REASON = "FAIL_TO_UPLOAD_DATA_WITH_REASON";

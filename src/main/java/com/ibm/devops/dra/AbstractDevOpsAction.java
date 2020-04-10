@@ -72,7 +72,8 @@ public abstract class AbstractDevOpsAction extends Recorder {
     private final static String IAM_GRANT_TYPE = "urn:ibm:params:oauth:grant-type:apikey";
     private final static String IAM_RESPONSE_TYPE = "cloud_iam";
     public static final String DEFAULT_ENV = "prod";
-    private static final String OTC_BROKER_ENDPOINT_ENV = "https://otcbroker-%(env).devopsinsights.cloud.ibm.com";
+    private static final String OTC_BROKER_ENDPOINT_DEV = "https://otcbroker-dev.us-south.devopsinsights.cloud.ibm.com";
+    private static final String OTC_BROKER_ENDPOINT_STAGING = "https://otcbroker.us-south.devopsinsights.test.cloud.ibm.com";
     private static final String OTC_BROKER_ENDPOINT = "https://otcbroker.devopsinsights.cloud.ibm.com";
     private static final String OTC_BROKER_PART = "/globalauth/toolchainids/";
     private static final String POLICY_PART = "/api/v5/toolchainids/{toolchain_name}/policies";
@@ -123,10 +124,12 @@ public abstract class AbstractDevOpsAction extends Recorder {
      * @return
      */
     public static String getOTCBrokerServer(String env) {
-        if ("prod".equals(env)) {
-            return OTC_BROKER_ENDPOINT;
+        if ("dev".equals(env)) {
+            return OTC_BROKER_ENDPOINT_DEV;
+        } else if ("staging".equals(env)) {
+            return OTC_BROKER_ENDPOINT_STAGING;
         } else {
-            return OTC_BROKER_ENDPOINT_ENV.replace("%(env)", env);
+            return OTC_BROKER_ENDPOINT;
         }
     }
 
