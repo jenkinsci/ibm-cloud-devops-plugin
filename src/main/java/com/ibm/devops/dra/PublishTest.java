@@ -515,6 +515,12 @@ public class PublishTest extends AbstractDevOpsAction implements SimpleBuildStep
             }
 
             if (statusCode == 200) {
+                JsonParser parser = new JsonParser();
+                JsonElement element = parser.parse(resStr);
+                JsonObject resJson = element.getAsJsonObject();
+                if (resJson.get("build_exists").getAsString() == "false") {
+                    printStream.println(getMessageWithVarAndPrefix(WARNING_NO_BUILD));
+                }
                 printStream.println(getMessageWithVarAndPrefix(UPLOAD_FILE_SUCCESS, contents.toString()));
             } else if (statusCode == 401 || statusCode == 403) {
                 // if gets 401 or 403, it returns html
