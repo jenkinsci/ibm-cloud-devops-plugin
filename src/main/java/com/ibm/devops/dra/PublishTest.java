@@ -518,7 +518,7 @@ public class PublishTest extends AbstractDevOpsAction implements SimpleBuildStep
                 JsonParser parser = new JsonParser();
                 JsonElement element = parser.parse(resStr);
                 JsonObject resJson = element.getAsJsonObject();
-                if (resJson.get("build_exists").getAsString() == "false") {
+                if ((resJson.get("build_exists") != null) && (resJson.get("build_exists").getAsString() == "false")) {
                     printStream.println(getMessageWithVarAndPrefix(WARNING_NO_BUILD));
                 }
                 printStream.println(getMessageWithVarAndPrefix(UPLOAD_FILE_SUCCESS, contents.toString()));
