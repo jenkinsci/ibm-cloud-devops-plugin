@@ -77,6 +77,8 @@ public class PublishSQ extends AbstractDevOpsAction implements SimpleBuildStep {
     private final static String SQ_RATING_API_PART = "/api/measures/component?metricKeys=reliability_rating,security_rating,sqale_rating&componentKey=";
     private final static String SQ_ISSUE_API_PART = "/api/issues/search?statuses=OPEN&projectKeys=";
 
+    private final static String SQ_RATING_API_PART_NEW_VERSION = "&component=";
+
     // form fields from UI
     private String applicationName;
     private String buildJobName;
@@ -263,7 +265,7 @@ public class PublishSQ extends AbstractDevOpsAction implements SimpleBuildStep {
             printStream.println(getMessageWithPrefix(QUERY_SQ_ISSUE_SUCCESS));
         }
 
-        JsonObject SQratings = sendGETRequest(hostname + SQ_RATING_API_PART + projectKey, hostname, projectKey, authToken);
+        JsonObject SQratings = sendGETRequest(hostname + SQ_RATING_API_PART + projectKey + SQ_RATING_API_PART_NEW_VERSION + projectKey, hostname, projectKey, authToken);
         JsonParser parser = new JsonParser();
         JsonObject component = (JsonObject)parser.parse(SQratings.get("component").toString());
         payload.add("ratings", component.get("measures"));
