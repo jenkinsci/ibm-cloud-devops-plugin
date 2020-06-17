@@ -72,8 +72,8 @@ public abstract class AbstractDevOpsAction extends Recorder {
     private final static String IAM_GRANT_TYPE = "urn:ibm:params:oauth:grant-type:apikey";
     private final static String IAM_RESPONSE_TYPE = "cloud_iam";
     public static final String DEFAULT_ENV = "prod";
-    private static final String OTC_BROKER_ENDPOINT_DEV = "https://otcbroker.us-south.devopsinsights.dev.cloud.ibm.com";
-    private static final String OTC_BROKER_ENDPOINT_STAGING = "https://otcbroker.us-south.devopsinsights.test.cloud.ibm.com";
+    private static final String OTC_BROKER_ENDPOINT_DEV = "https://otcbroker.devopsinsights.dev.cloud.ibm.com";
+    private static final String OTC_BROKER_ENDPOINT_STAGING = "https://otcbroker.devopsinsights.test.cloud.ibm.com";
     private static final String OTC_BROKER_ENDPOINT = "https://otcbroker.devopsinsights.cloud.ibm.com";
     private static final String OTC_BROKER_PART = "/globalauth/toolchainids/";
     private static final String POLICY_PART = "/api/v5/toolchainids/{toolchain_name}/policies";
