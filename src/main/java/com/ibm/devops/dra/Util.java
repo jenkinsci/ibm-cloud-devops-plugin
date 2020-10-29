@@ -32,6 +32,7 @@ import java.io.PrintStream;
 import java.net.URL;
 import java.util.*;
 import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 
 import static com.ibm.devops.dra.AbstractDevOpsAction.RESULT_SUCCESS;
 import static com.ibm.devops.dra.UIMessages.*;
@@ -240,7 +241,6 @@ public class Util {
 		// if user specify the build job as current job or leave it empty
 		if (name == null || name.isEmpty() || name.equals(build.getParent().getName())) {
 			printStream.println(getMessageWithPrefix(BUILD_JOB_IS_CURRENT_JOB));
-			printStream.printlin()
 			return build;
 		} else {
 			name = envVars.expand(name);
@@ -462,7 +462,12 @@ public class Util {
 		}
 		String stringFilter = String.format("\"(%s\\\\*\": ?\\\\*)\"[^\"\\\\]+(\\\\*)\"", KEY_REGEX);
 		Pattern stringFilterPattern = Pattern.compile(stringFilter, Pattern.CASE_INSENSITIVE & Pattern.MULTILINE);
-		String data = stringFilterPattern.matcher(data).replaceAll("\"$1\"***\"");
+		data = stringFilterPattern.matcher(data).replaceAll("\"$1\"***\"");
 		return data;
+	}
+
+	public static String filter(Object logData){
+		String data = String.valueOf(logData);
+		return filter(data);
 	}
 }
