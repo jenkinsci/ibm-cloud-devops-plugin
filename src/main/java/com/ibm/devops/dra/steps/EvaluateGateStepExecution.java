@@ -63,7 +63,7 @@ public class EvaluateGateStepExecution extends AbstractSynchronousNonBlockingSte
 
         String policy = step.getPolicy();
         if (isNullOrEmpty(policy)) {
-            printStream.println(getMessageWithVar(MISS_REQUIRED_STEP_PARAMS, "evaluateGate", "policy"));
+            printStream.println(filter(getMessageWithVar(MISS_REQUIRED_STEP_PARAMS, "evaluateGate", "policy")));
             return null;
         }
 

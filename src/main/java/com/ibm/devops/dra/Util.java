@@ -42,6 +42,12 @@ import static com.ibm.devops.dra.UIMessages.*;
 
 public class Util {
 
+   private static String KEY_REGEX = "([a-zA-Z0-9]+[_-])*(email|key|apikey|pass|passphrase|password|phone|secret|token|credentials|authorization|role_id|workerQueueCredentials|value)([_-][a-zA-Z0-9]+)*";
+   private static String EMAIL_REGEX = "\\b[-A-Z0-9._%+]+(?:@|%40)[-A-Z0-9.%]+(?:\\.|%2E)[A-Z]{2,}\\b";
+   private static String EMAIL_TEST_REGEX = "(?:@|%40)";
+   private static Pattern emailPattern = Pattern.compile(EMAIL_REGEX, Pattern.CASE_INSENSITIVE);
+   private static Pattern emailTest = Pattern.compile(EMAIL_TEST_REGEX, Pattern.CASE_INSENSITIVE);
+
 	/**
 	 * Print the plugin version
 	 * @param loader
@@ -234,6 +240,7 @@ public class Util {
 		// if user specify the build job as current job or leave it empty
 		if (name == null || name.isEmpty() || name.equals(build.getParent().getName())) {
 			printStream.println(getMessageWithPrefix(BUILD_JOB_IS_CURRENT_JOB));
+			printStream.printlin()
 			return build;
 		} else {
 			name = envVars.expand(name);
@@ -443,4 +450,19 @@ public class Util {
     public static String getGitCommit(EnvVars envVars) {
     	return envVars.get("GIT_COMMIT");
     }
+
+	public static String filter(String logData) {
+		// filter usernames and passwords out of URLs
+		String data = logData.replaceAll("://\\S+:\\S+@", "://");
+
+		Matcher testMatcher = emailTest.matcher(data);
+		if (testMatcher.find()) {
+			Matcher emailMatcher = emailPattern.matcher(data);
+			data = emailMatcher.replaceAll("***");
+		}
+		String stringFilter = String.format("\"(%s\\\\*\": ?\\\\*)\"[^\"\\\\]+(\\\\*)\"", KEY_REGEX);
+		Pattern stringFilterPattern = Pattern.compile(stringFilter, Pattern.CASE_INSENSITIVE & Pattern.MULTILINE);
+		String data = stringFilterPattern.matcher(data).replaceAll("\"$1\"***\"");
+		return data;
+	}
 }

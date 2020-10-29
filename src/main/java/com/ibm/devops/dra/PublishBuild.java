@@ -205,7 +205,7 @@ public class PublishBuild extends AbstractDevOpsAction implements SimpleBuildSte
             // upload build info
             String buildStatus = getJobResult(build, this.result);
             uploadBuildInfo(bluemixToken, build, envVars, buildNumber, buildStatus, dlmsUrl);
-            printStream.println(getMessageWithVarAndPrefix(CHECK_BUILD_STATUS, ccUrl));
+            printStream.println(filter(getMessageWithVarAndPrefix(CHECK_BUILD_STATUS, ccUrl)));
             BuildPublisherAction action = new BuildPublisherAction(ccUrl);
             build.addAction(action);
         } catch (Exception e) {
