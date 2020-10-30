@@ -451,23 +451,23 @@ public class Util {
     	return envVars.get("GIT_COMMIT");
     }
 
-	public static String filter(String logData) {
-		// filter usernames and passwords out of URLs
-		String data = logData.replaceAll("://\\S+:\\S+@", "://");
+    public static String filter(String logData) {
+        // filter usernames and passwords out of URLs
+        String data = logData.replaceAll("://\\S+:\\S+@", "://");
 
-		Matcher testMatcher = emailTest.matcher(data);
-		if (testMatcher.find()) {
-			Matcher emailMatcher = emailPattern.matcher(data);
-			data = emailMatcher.replaceAll("***");
-		}
-		String stringFilter = String.format("\"(%s\\\\*\": ?\\\\*)\"[^\"\\\\]+(\\\\*)\"", KEY_REGEX);
-		Pattern stringFilterPattern = Pattern.compile(stringFilter, Pattern.CASE_INSENSITIVE & Pattern.MULTILINE);
-		data = stringFilterPattern.matcher(data).replaceAll("\"$1\"***\"");
-		return data;
-	}
+        Matcher testMatcher = emailTest.matcher(data);
+        if (testMatcher.find()) {
+            Matcher emailMatcher = emailPattern.matcher(data);
+            data = emailMatcher.replaceAll("***");
+        }
+        String stringFilter = String.format("\"(%s\\\\*\": ?\\\\*)\"[^\"\\\\]+(\\\\*)\"", KEY_REGEX);
+        Pattern stringFilterPattern = Pattern.compile(stringFilter, Pattern.CASE_INSENSITIVE & Pattern.MULTILINE);
+        data = stringFilterPattern.matcher(data).replaceAll("\"$1\"***\"");
+        return data;
+    }
 
-	public static String filter(Object logData){
-		String data = String.valueOf(logData);
-		return filter(data);
-	}
+    public static String filter(Object logData){
+        String data = String.valueOf(logData);
+        return filter(data);
+    }
 }
