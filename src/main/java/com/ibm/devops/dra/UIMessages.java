@@ -2,6 +2,7 @@ package com.ibm.devops.dra;
 
 import java.util.Locale;
 import java.util.ResourceBundle;
+import com.ibm.devops.dra.Util;
 
 /**
  * Created by lix on 6/13/18.
@@ -86,6 +87,7 @@ public class UIMessages {
             str = str.replace(placeholder, s);
             index++;
         }
+        str = Util.filter(str);
         return str;
     }
 
@@ -97,6 +99,7 @@ public class UIMessages {
             str = str.replace(placeholder, s);
             index++;
         }
+        str = Util.filter(str);
         return getPrefix() + str;
     }
 

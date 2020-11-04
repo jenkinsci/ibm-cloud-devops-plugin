@@ -316,7 +316,7 @@ public class PublishTest extends AbstractDevOpsAction implements SimpleBuildStep
                 String additionalLifecycleStage = envVars.expand(this.additionalLifecycleStage);
                 scanAndUpload(build, workspace, additionalContents, additionalLifecycleStage, toolchainId, bluemixToken, environmentName, dlmsUrl);
             }
-            printStream.println(filter(getMessageWithVarAndPrefix(CHECK_TEST_RESULT, ccUrl)));
+            printStream.println(getMessageWithVarAndPrefix(CHECK_TEST_RESULT, ccUrl));
             // verify if user chooses advanced option to input customized DRA, just for freestyle job
             if (isNullOrEmpty(policyName)) {
                 return;

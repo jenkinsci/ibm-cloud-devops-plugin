@@ -770,7 +770,7 @@ public abstract class AbstractDevOpsAction extends Recorder {
 
         GatePublisherAction action = new GatePublisherAction(reportUrl, ccUrl, decision, policyName, build);
         build.addAction(action);
-        printStream.println(filter(getMessageWithVar(DECISION_REPORT, reportUrl, ccUrl, decision)));
+        printStream.println(getMessageWithVar(DECISION_REPORT, reportUrl, ccUrl, decision));
 
         // Stop the build
         if (willDisrupt && decision.equals("Fail")) {
@@ -791,7 +791,7 @@ public abstract class AbstractDevOpsAction extends Recorder {
                 sb.append("Body: " + bytes.toString("UTF-8"));
             }
             sb.append("\nResponse: " + status + " " + resStr);
-            printStream.println(filter(sb.toString()));
+            printStream.println(Util.filter(sb.toString()));
         } catch (IOException e) {
             e.printStackTrace();
             printStream.println("Error while print the debug log " + e.getMessage());

@@ -203,7 +203,7 @@ public class PublishDeploy extends AbstractDevOpsAction implements SimpleBuildSt
 
 			String deployStatus = getJobResult(build, this.result);
 			uploadDeploymentInfo(bluemixToken, dlmsUrl, build, applicationUrl, environmentName, toolchainId, deployStatus);
-			printStream.println(filter(getMessageWithVar(CHECK_DEPLOY_STATUS, link)));
+			printStream.println(getMessageWithVar(CHECK_DEPLOY_STATUS, link));
 		} catch (Exception e) {
 			printStream.println(getMessageWithPrefix(GOT_ERRORS) + e.getMessage());
 		}
