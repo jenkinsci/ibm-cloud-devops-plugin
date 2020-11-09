@@ -146,7 +146,7 @@ public final class MessageHandler {
                 if (deployableMessage) {
                 	postMethod.addHeader("x-create-connection", "true");
                 	printStream.println("[IBM Cloud DevOps] Sending Deployable Mapping message to webhook:");
-                	printStream.println(message);
+                	printStream.println(Util.filter(message));
                 }
                 
                 CloseableHttpResponse response = httpClient.execute(postMethod);

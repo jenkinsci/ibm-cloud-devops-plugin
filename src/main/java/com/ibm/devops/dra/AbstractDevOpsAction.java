@@ -791,7 +791,7 @@ public abstract class AbstractDevOpsAction extends Recorder {
                 sb.append("Body: " + bytes.toString("UTF-8"));
             }
             sb.append("\nResponse: " + status + " " + resStr);
-            printStream.println(sb.toString());
+            printStream.println(Util.filter(sb.toString()));
         } catch (IOException e) {
             e.printStackTrace();
             printStream.println("Error while print the debug log " + e.getMessage());

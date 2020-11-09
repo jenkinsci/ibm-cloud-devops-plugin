@@ -32,6 +32,7 @@ import java.io.PrintStream;
 import java.net.URL;
 import java.util.*;
 import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 
 import static com.ibm.devops.dra.AbstractDevOpsAction.RESULT_SUCCESS;
 import static com.ibm.devops.dra.UIMessages.*;
@@ -41,6 +42,12 @@ import static com.ibm.devops.dra.UIMessages.*;
  */
 
 public class Util {
+
+   private static String KEY_REGEX = "([a-zA-Z0-9]+[_-])*(email|key|apikey|pass|passphrase|password|phone|secret|token|credentials|authorization|role_id|workerQueueCredentials|value)([_-][a-zA-Z0-9]+)*";
+   private static String EMAIL_REGEX = "\\b[-A-Z0-9._%+]+(?:@|%40)[-A-Z0-9.%]+(?:\\.|%2E)[A-Z]{2,}\\b";
+   private static String EMAIL_TEST_REGEX = "(?:@|%40)";
+   private static Pattern emailPattern = Pattern.compile(EMAIL_REGEX, Pattern.CASE_INSENSITIVE);
+   private static Pattern emailTest = Pattern.compile(EMAIL_TEST_REGEX, Pattern.CASE_INSENSITIVE);
 
 	/**
 	 * Print the plugin version
@@ -442,5 +449,25 @@ public class Util {
     
     public static String getGitCommit(EnvVars envVars) {
     	return envVars.get("GIT_COMMIT");
+    }
+
+    public static String filter(String logData) {
+        // filter usernames and passwords out of URLs
+        String data = logData.replaceAll("://\\S+:\\S+@", "://");
+
+        Matcher testMatcher = emailTest.matcher(data);
+        if (testMatcher.find()) {
+            Matcher emailMatcher = emailPattern.matcher(data);
+            data = emailMatcher.replaceAll("***");
+        }
+        String stringFilter = String.format("\"(%s\\\\*\": ?\\\\*)\"[^\"\\\\]+(\\\\*)\"", KEY_REGEX);
+        Pattern stringFilterPattern = Pattern.compile(stringFilter, Pattern.CASE_INSENSITIVE & Pattern.MULTILINE);
+        data = stringFilterPattern.matcher(data).replaceAll("\"$1\"***\"");
+        return data;
+    }
+
+    public static String filter(Object logData){
+        String data = String.valueOf(logData);
+        return filter(data);
     }
 }
