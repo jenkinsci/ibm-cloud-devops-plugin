@@ -1,3 +1,4 @@
+DEPRECATED - Use DevOps Insights CLI instead - https://cloud.ibm.com/docs/cli?topic=cli-CLI_devops-insights
 # IBM Cloud DevOps
 
 **Please go to https://wiki.jenkins-ci.org/display/JENKINS/IBM+Cloud+DevOps+Plugin for the latest instructions of this plugin**
